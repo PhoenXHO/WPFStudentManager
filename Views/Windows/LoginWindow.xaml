@@ -5,20 +5,12 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:StudentManager"
         mc:Ignorable="d"
-        Title="MainWindow" Height="800" Width="1280"
+        Title="Login" Height="800" Width="1280"
         WindowStartupLocation="CenterScreen"
         ResizeMode="NoResize">
-    
-    <Window.Resources>
-        <ResourceDictionary>
-            <ResourceDictionary.MergedDictionaries>
-                <ResourceDictionary Source="RDictionary.xaml"/>
-            </ResourceDictionary.MergedDictionaries>
-        </ResourceDictionary>
-    </Window.Resources>
 
     <Grid>
-        <Image Source="Images/ensas.jpg" Stretch="Fill" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+        <Image Source="../Resources/Images/ensas.jpg" Stretch="Fill" HorizontalAlignment="Center" VerticalAlignment="Center"/>
         <Grid>
             <Grid.Background>
                 <SolidColorBrush Color="#0B3954" Opacity="0.85"/>
@@ -29,7 +21,7 @@
                     <DropShadowEffect ShadowDepth="10" BlurRadius="25" Color="Black" Opacity="0.3" Direction="270"/>
                 </Border.Effect>
                 <StackPanel Orientation="Vertical" VerticalAlignment="Center">
-                    <Image Source="Images/logo.png" Height="100" Width="140" Margin="0,20,0,20"/>
+                    <Image Source="../Resources/Images/logo.png" Height="100" Width="140" Margin="0,20,0,20"/>
                     <TextBlock TextWrapping="Wrap" Text="Login" FontFamily="Dubai Medium" FontSize="24" FontWeight="Medium" TextAlignment="Center"/>
                     <TextBlock TextWrapping="Wrap" Text="Username" Margin="20,20,20,0" Style="{StaticResource FieldLabel}"/>
                     <TextBox x:Name="usernameField" TextWrapping="Wrap" Text="" Margin="20,5,20,0" Style="{StaticResource TextField}"/>

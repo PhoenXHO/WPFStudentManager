@@ -9,24 +9,25 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="Images\ensas.jpg" />
-    <None Remove="Images\logo.png" />
+    <None Remove="Resources\Images\ensas.jpg" />
+    <None Remove="Resources\Images\logo.png" />
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="MaterialDesignColors" Version="3.1.0" />
     <PackageReference Include="MaterialDesignThemes" Version="5.1.0" />
     <PackageReference Include="Microsoft.Extensions.Configuration" Version="9.0.0" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="9.0.0" />
+    <PackageReference Include="MvvmLightLibs" Version="5.4.1.1" />
     <PackageReference Include="MySql.Data" Version="9.1.0" />
+    <PackageReference Include="WPF-UI" Version="3.0.5" />
   </ItemGroup>
 
   <ItemGroup>
-    <Resource Include="Images\ensas.jpg" />
-    <Resource Include="Images\logo.png" />
-	  <Resource Include="Images\admin.jpeg" />
-	  <Resource Include="Images\gestion.png" />
-	  <Resource Include="Images\upgrade1.png" />
+    <Resource Include="Resources\Images\ensas.jpg" />
+    <Resource Include="Resources\Images\logo.png" />
+	  <Resource Include="Resources\Images\admin.jpeg" />
+	  <Resource Include="Resources\Images\gestion.png" />
+	  <Resource Include="Resources\Images\upgrade1.png" />
   </ItemGroup>
 
   <ItemGroup>
@@ -36,7 +37,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="ressources\" />
+    <Page Include="App.xaml" />
   </ItemGroup>
 
 </Project>

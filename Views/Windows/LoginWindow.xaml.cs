@@ -1,4 +1,5 @@
 ﻿using MySql.Data.MySqlClient;
+using StudentManager.Models;
 using System.Text;
 using System.Windows;
 using System.Windows.Controls;
