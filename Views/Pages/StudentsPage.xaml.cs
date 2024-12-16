@@ -1,17 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using StudentManager.ViewModels;
+using StudentManager.ViewModels.Pages;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 
 namespace StudentManager.Views.Pages
 {
@@ -23,6 +13,21 @@ namespace StudentManager.Views.Pages
         public StudentsPage()
         {
             InitializeComponent();
+            DataContext = new MainViewModel();
+        }
+
+        private void AddButton_Click(object sender, RoutedEventArgs e)
+        {
+            var mainViewModel = (MainViewModel)DataContext;
+            var dialog = new Dialogs.AddStudentDialog
+            {
+                DataContext = mainViewModel.MajorsViewModel
+            };
+
+            if (dialog.ShowDialog() == true)
+            {
+                mainViewModel.StudentsViewModel.Students.Add(dialog.NewStudent);
+            }
         }
     }
 }
