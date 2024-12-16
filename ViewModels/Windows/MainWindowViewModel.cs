@@ -55,6 +55,7 @@ namespace StudentManager.ViewModels.Windows
             }
         ];
 
+
         public MainWindowViewModel()
         {
         }
