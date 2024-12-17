@@ -1,16 +1,15 @@
 ﻿using MySql.Data.MySqlClient;
 using StudentManager.Models;
 using System.Windows;
-using Wpf.Ui.Controls;
 
-namespace StudentManager.Views.Windows
+namespace StudentManager
 {
     /// <summary>
-    /// Interaction logic for LoginWindow.xaml
+    /// Interaction logic for LoginWindow1.xaml
     /// </summary>
-    public partial class LoginWindow : FluentWindow
+    public partial class LoginWindow1 : Window
     {
-        public LoginWindow()
+        public LoginWindow1()
         {
             InitializeComponent();
         }
@@ -33,19 +32,19 @@ namespace StudentManager.Views.Windows
                 using MySqlDataReader reader = command.ExecuteReader();
                 if (reader.HasRows)
                 {
-                    System.Windows.MessageBox.Show("Login successful!");
+                    MessageBox.Show("Login successful!");
                     MainWindow mainWindow = new();
                     mainWindow.Show();
                     Close();
                 }
                 else
                 {
-                    System.Windows.MessageBox.Show("Login failed!");
+                    MessageBox.Show("Login failed!");
                 }
             }
             catch (Exception ex)
             {
-                System.Windows.MessageBox.Show("Connection failed: " + ex.Message);
+                MessageBox.Show("Connection failed: " + ex.Message);
             }
         }
     }
