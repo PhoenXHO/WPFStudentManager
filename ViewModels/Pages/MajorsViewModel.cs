@@ -15,7 +15,7 @@ namespace StudentManager.ViewModels.Pages
 
         public MajorsViewModel()
         {
-            //TODO: Replace with data from a database
+            //TODO: Replace with data from a database (start ids from 1 so that the `All` item can have an id of 0)
             Majors =
             [
                 new Major { Id = 1, Name = "Computer Science", Description = "Computer Science" },

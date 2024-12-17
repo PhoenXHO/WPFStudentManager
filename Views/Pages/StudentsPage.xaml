@@ -5,9 +5,14 @@
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
       xmlns:local="clr-namespace:StudentManager.Views.Pages"
       xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+      xmlns:converters="clr-namespace:StudentManager.Converters"
       mc:Ignorable="d" 
-      d:DesignHeight="450" d:DesignWidth="800"
+      d:DesignHeight="450" d:DesignWidth="1280"
       Title="StudentsPage">
+
+    <Page.Resources>
+        <converters:GreaterThanZeroConverter x:Key="GreaterThanZeroConverter"/>
+    </Page.Resources>
 
     <Grid Margin="10">
         <Grid.RowDefinitions>
@@ -21,16 +26,16 @@
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
 
-		<TextBlock Grid.Row="0" Grid.ColumnSpan="2" Text="Gestion des étudiants"
+        <TextBlock Grid.Row="0" Grid.ColumnSpan="2" Text="Gestion des étudiants"
                    FontSize="24" FontWeight="Bold" Margin="0,10,0,30" Foreground="White"
                    TextAlignment="Center"/>
 
         <StackPanel Grid.Row="1" Grid.ColumnSpan="2" Orientation="Horizontal" Margin="0,10,0,10" HorizontalAlignment="Center">
             <TextBlock Text="Selectionner la filière:" VerticalAlignment="Center" Margin="0,0,10,0" Foreground="White"/>
             <ComboBox x:Name="MajorComboBox" Width="200" Margin="0,0,10,0"
-                      ItemsSource="{Binding MajorsViewModel.Majors}" DisplayMemberPath="Name"/>
+                      ItemsSource="{Binding StudentsViewModel.MajorsWithAll}" DisplayMemberPath="Name"/>
             <TextBlock Text="Recherche:" VerticalAlignment="Center" Margin="0,0,10,0" Foreground="White"/>
-            <TextBox x:Name="SearchTextBox" Width="200" Margin="0,0,10,0"/>
+            <ui:TextBox x:Name="SearchTextBox" Width="200" Margin="0,0,10,0" PlaceholderText="Rechercher un étudiant"/>
         </StackPanel>
 
         <ui:Card Grid.Row="2" Grid.Column="0" VerticalAlignment="Top" Margin="10" MinWidth="250">
@@ -40,24 +45,47 @@
             </StackPanel>
         </ui:Card>
 
-	    <ui:DataGrid Grid.Row="2" Grid.Column="1" AutoGenerateColumns="False" Margin="10"
-					 ItemsSource="{Binding StudentsViewModel.Students}"
-					 SelectionMode="Extended" SelectionUnit="FullRow" IsReadOnly="False"
-					 HorizontalAlignment="Stretch" ScrollViewer.HorizontalScrollBarVisibility="Auto">
-		    <DataGrid.Columns>
-			    <DataGridTextColumn Header="ID" Binding="{Binding Id}" MinWidth="30"/>
-			    <DataGridTextColumn Header="Nom" Binding="{Binding LastName}" Width="*" MinWidth="60"/>
-			    <DataGridTextColumn Header="Prénom" Binding="{Binding FirstName}" Width="*" MinWidth="60"/>
-			    <DataGridTextColumn Header="Filière" Binding="{Binding Major.Name}" Width="1.5*" MinWidth="100"/>
-			    <DataGridTextColumn Header="Date de naissance" Binding="{Binding DateOfBirth}" Width="3*" MinWidth="150"/>
-			    <DataGridTextColumn Header="Email" Binding="{Binding Email}" Width="3*" MinWidth="150"/>
-		    </DataGrid.Columns>
-	    </ui:DataGrid>
+        <ui:DataGrid x:Name="UIDataGrid" Grid.Row="2" Grid.Column="1" AutoGenerateColumns="False" Margin="10"
+                     ItemsSource="{Binding StudentsViewModel.Students}"
+                     SelectionMode="Extended" SelectionUnit="FullRow" IsReadOnly="False"
+                     HorizontalAlignment="Stretch" ScrollViewer.HorizontalScrollBarVisibility="Auto"
+                     CanUserAddRows="False"
+                     PreviewMouseLeftButtonDown="DataGrid_PreviewMouseLeftButtonDown"
+                     PreviewKeyDown="DataGrid_PreviewKeyDown"
+                     PreviewKeyUp="DataGrid_PreviewKeyUp">
+            <DataGrid.Columns>
+                <DataGridTemplateColumn Width="30" MaxWidth="30" MinWidth="30">
+                    <DataGridTemplateColumn.Header>
+                        <CheckBox x:Name="SelectAllCheckBox" Content="Tout sélectionner" ToolTip="Sélectionner tous les étudiants"
+                                  Checked="SelectAllCheckBox_Checked" Unchecked="SelectAllCheckBox_Unchecked"/>
+                    </DataGridTemplateColumn.Header>
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <CheckBox IsChecked="{Binding IsSelected, Mode=TwoWay}"
+                                      Checked="CheckBox_Checked" Unchecked="CheckBox_Unchecked"/>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+                    <DataGridTextColumn Header="ID" Binding="{Binding Id}" MinWidth="30"/>
+                <DataGridTextColumn Header="Nom" Binding="{Binding LastName}" Width="*" MinWidth="60"/>
+                <DataGridTextColumn Header="Prénom" Binding="{Binding FirstName}" Width="*" MinWidth="60"/>
+                <DataGridTextColumn Header="Filière" Binding="{Binding Major.Name}" Width="1.5*" MinWidth="100"/>
+                <DataGridTextColumn Header="Date de naissance" Binding="{Binding DateOfBirth}" Width="3*" MinWidth="150"/>
+                <DataGridTextColumn Header="Email" Binding="{Binding Email}" Width="3*" MinWidth="200"/>
+            </DataGrid.Columns>
+        </ui:DataGrid>
 
-        <StackPanel Grid.Row="3" Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,10,0,10">
+        <StackPanel Grid.Row="3" Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Left" Margin="0,10,0,10">
             <ui:Button Content="Ajouter" Width="100" Margin="10,0,10,0" Click="AddButton_Click"/>
-            <ui:Button Content="Modifier" Width="100" Margin="10,0,10,0"/>
-            <ui:Button Content="Supprimer" Width="100" Margin="10,0,10,0"/>
+            <!--<ui:Button Content="Modifier" Width="100" Margin="10,0,10,0"/>-->
+            <ui:Button Content="Supprimer" Width="100" Margin="10,0,10,0" Click="DeleteButton_Click"
+                         IsEnabled="{Binding StudentsViewModel.SelectedStudents.Count,
+                                             Converter={StaticResource GreaterThanZeroConverter}}"/>
         </StackPanel>
+        
+        <!-- Info button-->
+        <ui:Button Grid.Row="3" Grid.Column="1" Content="" Icon="{ui:SymbolIcon Info24}" Margin="10" Appearance="Primary"
+                   HorizontalAlignment="Right"
+                   Command="{Binding StudentsViewModel.ViewUsageInfoCommand}"/>
     </Grid>
 </Page>
