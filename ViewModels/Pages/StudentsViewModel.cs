@@ -73,7 +73,7 @@ namespace StudentManager.ViewModels.Pages
             ];
 
             MajorsWithAll = new ObservableCollection<Major>(majorsViewModel.Majors);
-            MajorsWithAll.Insert(0, new Major { Id = 0, Name = "All", Description = "All Majors" });
+            MajorsWithAll.Insert(0, new Major { Id = 0, Name = "Tout", Description = "All Majors" });
 
             // Subscribe to the CollectionChanged event to update the SelectedStudents property
             Students.CollectionChanged += (s, e) => RaisePropertyChanged(nameof(SelectedStudents));
