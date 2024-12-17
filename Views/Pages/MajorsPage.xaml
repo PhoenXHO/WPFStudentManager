@@ -4,11 +4,48 @@
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
       xmlns:local="clr-namespace:StudentManager.Views.Pages"
+      xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
       mc:Ignorable="d" 
       d:DesignHeight="450" d:DesignWidth="800"
       Title="MajorsPage">
 
-    <Grid>
-        <TextBlock Text="Majors Page" FontSize="48" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="White"/>
+    <Grid Margin="10">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <TextBlock Grid.Row="0" Text="Gestion des filières"
+                   FontSize="24" FontWeight="Bold" Margin="0,10,0,30" Foreground="White"
+                   TextAlignment="Center"/>
+
+        <ItemsControl Grid.Row="1" ItemsSource="{Binding Majors}">
+            <ItemsControl.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <WrapPanel/>
+                </ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
+            <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                    <ui:Card Margin="10" Padding="10" MinWidth="250">
+                        <StackPanel>
+                            <TextBlock Text="{Binding Name}" FontSize="16" FontWeight="Bold" Margin="10"/>
+                            <TextBlock Text="{Binding Description}" Margin="10" TextWrapping="Wrap"/>
+                            <Button Content="View Details"
+                                    Command="{Binding DataContext.ViewDetailsCommand,
+                                                      RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                    CommandParameter="{Binding}" Margin="0,10,0,0"/>
+                        </StackPanel>
+                    </ui:Card>
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+        </ItemsControl>
+
+        <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,10,0,10">
+            <ui:Button Content="Ajouter" Width="100" Margin="10,0,10,0"/>
+            <ui:Button Content="Modifier" Width="100" Margin="10,0,10,0"/>
+            <ui:Button Content="Supprimer" Width="100" Margin="10,0,10,0"/>
+        </StackPanel>
     </Grid>
 </Page>

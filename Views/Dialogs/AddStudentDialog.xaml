@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:StudentManager.Views.Dialogs"
         mc:Ignorable="d"
-        Title="AddStudentDialog" Height="500" Width="800"
+        Title="AddStudentDialog" Height="500" Width="400"
                  MinHeight="500"
         WindowStartupLocation="CenterScreen"
         xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"

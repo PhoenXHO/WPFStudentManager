@@ -5,28 +5,26 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:StudentManager.Views"
         mc:Ignorable="d"
-        Title="MainWindow" Height="800" Width="1280"
+        Title="Gestion des Étudiants" Height="800" Width="1280"
                  MinHeight="500" MinWidth="1000"
         WindowStartupLocation="CenterScreen"
         xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
         ExtendsContentIntoTitleBar="True"
         WindowBackdropType="Mica">
     <Grid>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition/>
-        </Grid.RowDefinitions>
-        <ui:TitleBar Title="Gestion des Étudiants" Icon="{ui:SymbolIcon People24}" Grid.Row="0"/>
-        <ui:NavigationView x:Name="RootNavigation" Grid.Row="1"
+        <ui:TitleBar x:Name="TitleBar" Title="Gestion des Étudiants" Icon="{ui:SymbolIcon People24}" Grid.Row="0"/>
+        <ui:NavigationView x:Name="RootNavigation" Grid.Row="0"
+                           IsBackButtonVisible="Visible"
                            MenuItemsSource="{Binding MenuItems}"
                            FooterMenuItemsSource="{Binding FooterMenuItems}"
+                           TitleBar="{Binding ElementName=TitleBar, Mode=OneWay}"
                            SelectionChanged="OnNavigationSelectionChanged">
-            <ui:NavigationView.Header>
+            <!--<ui:NavigationView.Header>
                 <ui:BreadcrumbBar
                       Margin="42,32,0,0"
                       FontSize="28"
                       FontWeight="DemiBold" />
-            </ui:NavigationView.Header>
+            </ui:NavigationView.Header>-->
         </ui:NavigationView>
     </Grid>
 </ui:FluentWindow>

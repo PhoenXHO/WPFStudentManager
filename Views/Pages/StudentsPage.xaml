@@ -12,6 +12,7 @@
     <Grid Margin="10">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
@@ -20,32 +21,40 @@
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
 
-        <StackPanel Grid.Row="0" Grid.ColumnSpan="2" Orientation="Horizontal" Margin="0,10,0,10" HorizontalAlignment="Center">
+		<TextBlock Grid.Row="0" Grid.ColumnSpan="2" Text="Gestion des étudiants"
+                   FontSize="24" FontWeight="Bold" Margin="0,10,0,30" Foreground="White"
+                   TextAlignment="Center"/>
+
+        <StackPanel Grid.Row="1" Grid.ColumnSpan="2" Orientation="Horizontal" Margin="0,10,0,10" HorizontalAlignment="Center">
             <TextBlock Text="Selectionner la filière:" VerticalAlignment="Center" Margin="0,0,10,0" Foreground="White"/>
-            <ComboBox x:Name="MajorComboBox" Width="200" Margin="0,0,10,0" />
+            <ComboBox x:Name="MajorComboBox" Width="200" Margin="0,0,10,0"
+                      ItemsSource="{Binding MajorsViewModel.Majors}" DisplayMemberPath="Name"/>
             <TextBlock Text="Recherche:" VerticalAlignment="Center" Margin="0,0,10,0" Foreground="White"/>
             <TextBox x:Name="SearchTextBox" Width="200" Margin="0,0,10,0"/>
         </StackPanel>
 
-        <ui:Card Grid.Row="1" Grid.Column="0" VerticalAlignment="Top" Margin="10" MinWidth="250">
+        <ui:Card Grid.Row="2" Grid.Column="0" VerticalAlignment="Top" Margin="10" MinWidth="250">
             <StackPanel>
                 <TextBlock Text="Informations sur la filière:" FontSize="16" FontWeight="Bold" Margin="10"/>
                 <TextBlock Text="This is the content of the card." Margin="10" TextWrapping="Wrap"/>
             </StackPanel>
         </ui:Card>
-        <ui:DataGrid Grid.Row="1" Grid.Column="1" AutoGenerateColumns="False" Margin="10" ItemsSource="{Binding StudentsViewModel.Students}"
-                     SelectionMode="Extended" SelectionUnit="FullRow" IsReadOnly="False">
-            <DataGrid.Columns>
-                <DataGridTextColumn Header="ID" Binding="{Binding Id}"/>
-                <DataGridTextColumn Header="Nom" Binding="{Binding LastName}"/>
-                <DataGridTextColumn Header="Prénom" Binding="{Binding FirstName}"/>
-                <DataGridTextColumn Header="Filière" Binding="{Binding Major.Name}"/>
-                <DataGridTextColumn Header="Date de naissance" Binding="{Binding DateOfBirth}"/>
-                <DataGridTextColumn Header="Email" Binding="{Binding Email}"/>
-            </DataGrid.Columns>
-        </ui:DataGrid>
 
-        <StackPanel Grid.Row="2" Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,10,0,10">
+	    <ui:DataGrid Grid.Row="2" Grid.Column="1" AutoGenerateColumns="False" Margin="10"
+					 ItemsSource="{Binding StudentsViewModel.Students}"
+					 SelectionMode="Extended" SelectionUnit="FullRow" IsReadOnly="False"
+					 HorizontalAlignment="Stretch" ScrollViewer.HorizontalScrollBarVisibility="Auto">
+		    <DataGrid.Columns>
+			    <DataGridTextColumn Header="ID" Binding="{Binding Id}" MinWidth="30"/>
+			    <DataGridTextColumn Header="Nom" Binding="{Binding LastName}" Width="*" MinWidth="60"/>
+			    <DataGridTextColumn Header="Prénom" Binding="{Binding FirstName}" Width="*" MinWidth="60"/>
+			    <DataGridTextColumn Header="Filière" Binding="{Binding Major.Name}" Width="1.5*" MinWidth="100"/>
+			    <DataGridTextColumn Header="Date de naissance" Binding="{Binding DateOfBirth}" Width="3*" MinWidth="150"/>
+			    <DataGridTextColumn Header="Email" Binding="{Binding Email}" Width="3*" MinWidth="150"/>
+		    </DataGrid.Columns>
+	    </ui:DataGrid>
+
+        <StackPanel Grid.Row="3" Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,10,0,10">
             <ui:Button Content="Ajouter" Width="100" Margin="10,0,10,0" Click="AddButton_Click"/>
             <ui:Button Content="Modifier" Width="100" Margin="10,0,10,0"/>
             <ui:Button Content="Supprimer" Width="100" Margin="10,0,10,0"/>
