@@ -27,11 +27,12 @@
                 <ui:Card HorizontalAlignment="Center" VerticalAlignment="Center" Padding="20"
                          Background="#880B3954">
                     <StackPanel Orientation="Vertical" VerticalAlignment="Center" HorizontalAlignment="Center" Width="400">
-                        <ui:Card Padding="10" Background="#BBE4F6FF" Margin="0,0,0,20">
-							<Image Source="../../Resources/Images/logo.png" Width="140" Height="100" Margin="0,20,0,20"/>
-						</ui:Card>
+                        <!--<ui:Card Padding="10" Background="#BBEDF9FF" Margin="0,0,0,20">
+                            <Image Width="200" Source="../../Resources/Images/logo.png" Height="100" Margin="0,20,0,20"/>
+						</ui:Card>-->
 
-                        <TextBlock Text="Login" FontFamily="Dubai Medium" FontSize="24" FontWeight="Medium" TextAlignment="Center" Margin="0,0,0,20"/>
+                        <TextBlock Text="Login" FontFamily="Dubai Medium" FontSize="24" FontWeight="Medium"
+                                   TextAlignment="Center" Margin="0,0,0,20"/>
                         <TextBlock Text="Username" Margin="20,0,20,0"/>
                         <TextBox x:Name="usernameField" Margin="20,5,20,0"/>
                         <TextBlock Text="Password" Margin="20,20,20,0"/>
