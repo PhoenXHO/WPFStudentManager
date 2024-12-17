@@ -17,11 +17,11 @@ namespace StudentManager.Views.Windows
 
         private void Login(object sender, RoutedEventArgs e)
         {
-            using MySqlConnection connection = new(DBConnection.ConnectionString);
+            using MySqlConnection? connection = DBConnection.GetConnection();
             try
             {
                 // Open the connection
-                connection.Open();
+                connection?.Open();
 
                 // Create a new command
                 using MySqlCommand command = new("SELECT * FROM users WHERE username = @username AND password = @password", connection);

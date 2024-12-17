@@ -29,9 +29,9 @@
     }
 }
 ```
-- The `DBConnection.cs` file in the `Database` folder contains the connection string fetched from the `appsettings.json` file. You can use it like this:
+- The `DBConnection.cs` file in the `Database` folder contains a method to get the database connection. Use this method to get the connection object wherever needed. For example:
 ```csharp
-string connectionString = DBConnection.ConnectionString;
+using MySqlConnection? connection = DBConnection.GetConnection();
 ``` 
 - The `Student` and `Major` models are defined in the `Models` folder. These models will be used to interact with the database.
 - The `StudentViewModel` and `MajorViewModel` classes are defined in the `ViewModels` folder. These classes will be used to bind the data to the UI. They contain observable collections for data binding purposes. Replace the code to fill these collections with actual data from the database.
