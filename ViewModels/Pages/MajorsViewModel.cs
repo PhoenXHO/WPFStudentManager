@@ -10,6 +10,7 @@ namespace StudentManager.ViewModels.Pages
     public class MajorsViewModel : ViewModelBase
     {
         public ObservableCollection<Major> Majors { get; }
+        public ObservableCollection<Major> SelectedMajors => new(Majors.Where(m => m.IsSelected));
 
         public ICommand ViewDetailsCommand { get; }
 
@@ -23,6 +24,8 @@ namespace StudentManager.ViewModels.Pages
                 new Major { Id = 3, Name = "Physics", Description = "Physics" },
                 new Major { Id = 4, Name = "Chemistry", Description = "Chemistry" }
             ];
+
+            Majors.CollectionChanged += (m, e) => RaisePropertyChanged(nameof(SelectedMajors)); // Update SelectedMajors when Majors changes
 
             ViewDetailsCommand = new RelayCommand<Major>(ViewDetails);
         }

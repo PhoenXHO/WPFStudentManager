@@ -16,7 +16,7 @@ namespace StudentManager.ViewModels.Pages
     {
         public ObservableCollection<Student> Students { get; }
         public ObservableCollection<Student> SelectedStudents => new(Students.Where(s => s.IsSelected));
-        public ObservableCollection<Major> MajorsWithAll { get; }
+        public ObservableCollection<Major> MajorsWithAll { get; } 
 
         public ICommand ViewUsageInfoCommand { get; }
 
@@ -79,6 +79,7 @@ namespace StudentManager.ViewModels.Pages
             Students.CollectionChanged += (s, e) => RaisePropertyChanged(nameof(SelectedStudents));
 
             ViewUsageInfoCommand = new RelayCommand(ViewUsageInfo);
+
         }
 
         private void ViewUsageInfo()

@@ -7,11 +7,13 @@ namespace StudentManager.ViewModels
     {
         public StudentsViewModel StudentsViewModel { get; }
         public MajorsViewModel MajorsViewModel { get; }
+        public StatsViewModel StatsViewModel { get; }
 
         public MainViewModel()
         {
             MajorsViewModel = new MajorsViewModel();
             StudentsViewModel = new StudentsViewModel(MajorsViewModel);
+            StatsViewModel = new StatsViewModel();
         }
     }
 }

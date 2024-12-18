@@ -66,7 +66,7 @@
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
-                    <DataGridTextColumn Header="ID" Binding="{Binding Id}" MinWidth="30"/>
+                <DataGridTextColumn Header="ID" Binding="{Binding Id}" MinWidth="30"/>
                 <DataGridTextColumn Header="Nom" Binding="{Binding LastName}" Width="*" MinWidth="60"/>
                 <DataGridTextColumn Header="Prénom" Binding="{Binding FirstName}" Width="*" MinWidth="60"/>
                 <DataGridTextColumn Header="Filière" Binding="{Binding Major.Name}" Width="1.5*" MinWidth="100"/>
@@ -82,10 +82,10 @@
                          IsEnabled="{Binding StudentsViewModel.SelectedStudents.Count,
                                              Converter={StaticResource GreaterThanZeroConverter}}"/>
         </StackPanel>
-        
+
         <!-- Info button-->
         <ui:Button Grid.Row="3" Grid.Column="1" Content="" Icon="{ui:SymbolIcon Info24}" Margin="10" Appearance="Primary"
                    HorizontalAlignment="Right"
                    Command="{Binding StudentsViewModel.ViewUsageInfoCommand}"/>
     </Grid>
-</Page>
+    </Page>
