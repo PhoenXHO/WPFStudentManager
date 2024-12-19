@@ -14,6 +14,7 @@ namespace StudentManager.Views.Pages
     {
         private bool _isShiftPressed;
         private int _lastSelectedIndex = -1;
+        private bool _lastSelectedState;
 
         public StudentsPage()
         {
@@ -57,6 +58,7 @@ namespace StudentManager.Views.Pages
             student.IsSelected = true;
             // Set the last selected index to the current index
             _lastSelectedIndex = ((DataGridRow)UIDataGrid.ItemContainerGenerator.ContainerFromItem(student)).GetIndex();
+            _lastSelectedState = true;
             // Raise the PropertyChanged event for SelectedStudents
             ((MainViewModel)DataContext).StudentsViewModel.RaisePropertyChanged(nameof(StudentsViewModel.SelectedStudents));
         }
@@ -65,6 +67,9 @@ namespace StudentManager.Views.Pages
         {
             var student = (Models.Student)((CheckBox)sender).DataContext;
             student.IsSelected = false;
+            // Set the last selected index to the current index
+            _lastSelectedIndex = ((DataGridRow)UIDataGrid.ItemContainerGenerator.ContainerFromItem(student)).GetIndex();
+            _lastSelectedState = false;
             // Raise the PropertyChanged event for SelectedStudents
             ((MainViewModel)DataContext).StudentsViewModel.RaisePropertyChanged(nameof(StudentsViewModel.SelectedStudents));
         }
@@ -104,7 +109,7 @@ namespace StudentManager.Views.Pages
                         {
                             if (dataGrid?.Items[i] is Models.Student student)
                             {
-                                student.IsSelected = !student.IsSelected;
+                                student.IsSelected = _lastSelectedState;
                             }
                         }
                     }

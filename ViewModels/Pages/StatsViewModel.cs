@@ -18,26 +18,33 @@ using LiveChartsCore.SkiaSharpView.Painting;
 using LiveChartsCore.SkiaSharpView;
 using LiveChartsCore;
 using SkiaSharp;
+using System.ComponentModel;
 
 
 namespace StudentManager.ViewModels.Pages
 {
-    public class StatsViewModel : ViewModelBase
+    public class StatsViewModel : ViewModelBase, INotifyPropertyChanged
     {
-        public ObservableCollection<Stats> MajorStats { get; set; }
+        private ObservableCollection<Stats> _majorStats;
 
+        public ObservableCollection<Stats> MajorStats
+        {
+            get => _majorStats;
+            set
+            {
+                _majorStats = value;
+                RaisePropertyChanged(nameof(MajorStats));
+            }
+        }
 
         public StatsViewModel()
         {
-            MajorStats = new ObservableCollection<Stats>
-            {
+            MajorStats =
+            [
                 new Stats { Major = "Computer Science", StudentCount = 120 },
                 new Stats { Major = "Mathematics", StudentCount = 80 },
-                new Stats { Major = "Physics", StudentCount = 60 },
-                new Stats { Major = "Chemistry", StudentCount = 50 }
-            };
+                new Stats { Major = "Physics", StudentCount = 60 }
+            ];
         }
-
     }
-
 }
