@@ -158,7 +158,6 @@ namespace StudentManager.Views.Pages
                         for (int i = start + offset; i <= end; i++)
                         {
                             if (dataGrid?.Items[i] is Student student)
-                            if (dataGrid?.Items[i] is Student student)
                             {
                                 student.IsSelected = !student.IsSelected;
                             }
