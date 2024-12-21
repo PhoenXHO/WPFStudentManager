@@ -49,7 +49,7 @@
         </ui:Card>
 
         <ui:DataGrid x:Name="UIDataGrid" Grid.Row="2" Grid.Column="1" AutoGenerateColumns="False" Margin="10"
-					 Height="Auto" MaxHeight="500"
+                     Height="Auto" MaxHeight="500"
                      HorizontalAlignment="Stretch"
                      VerticalAlignment="Top"
                      ScrollViewer.CanContentScroll="True"
@@ -78,8 +78,41 @@
                 <DataGridTextColumn Header="ID" Binding="{Binding Id}" MinWidth="30" IsReadOnly="True"/>
                 <DataGridTextColumn Header="Nom" Binding="{Binding LastName, Mode=TwoWay}" Width="*" MinWidth="60"/>
                 <DataGridTextColumn Header="Prénom" Binding="{Binding FirstName, Mode=TwoWay}" Width="*" MinWidth="60"/>
-                <DataGridTextColumn Header="Filière" Binding="{Binding Major.Name, Mode=OneWay}" Width="1.5*" MinWidth="100"/>
-                <DataGridTextColumn Header="Date de naissance" Binding="{Binding DateOfBirth, Mode=TwoWay}" Width="3*" MinWidth="150"/>
+                <!--<DataGridTextColumn Header="Filière" Binding="{Binding Major.Name, Mode=OneWay}" Width="1.5*" MinWidth="100"/>-->
+
+                <!-- Major - ComboBox -->
+                <DataGridTemplateColumn Header="Filière" Width="1.5*" MinWidth="150">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding Major.Name}"/>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                    <DataGridTemplateColumn.CellEditingTemplate>
+                        <DataTemplate>
+                            <ComboBox ItemsSource="{Binding DataContext.MajorsViewModel.Majors,
+                                                            RelativeSource={RelativeSource AncestorType={x:Type Page}}}"
+                                      DisplayMemberPath="Name"
+                                      SelectedValue="{Binding Major, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellEditingTemplate>
+                </DataGridTemplateColumn>
+
+                <!-- Date of birth - DatePicker -->
+                <DataGridTemplateColumn Header="Date de naissance" Width="3*" MinWidth="150">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding DateOfBirth, StringFormat=dd/MM/yyyy}"/>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                    <DataGridTemplateColumn.CellEditingTemplate>
+                        <DataTemplate>
+                            <DatePicker SelectedDate="{Binding DateOfBirth, Mode=TwoWay,
+                                                               UpdateSourceTrigger=PropertyChanged}"
+                                        SelectedDateFormat="Short"/>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellEditingTemplate>
+                </DataGridTemplateColumn>
+
                 <DataGridTextColumn Header="Email" Binding="{Binding Email, Mode=TwoWay}" Width="3*" MinWidth="200"/>
             </ui:DataGrid.Columns>
         </ui:DataGrid>
