@@ -16,7 +16,6 @@ namespace StudentManager.Views.Pages
     {
         private bool _isShiftPressed;
         private int _lastSelectedIndex = -1;
-        private bool _lastSelectedState;
 
         public StudentsPage()
         {
@@ -34,7 +33,7 @@ namespace StudentManager.Views.Pages
 
             if (dialog.ShowDialog() == true)
             {
-                // Ajouter l'étudiant à la base de données et mettre à jour le ViewModel
+
                 var student = dialog.NewStudent;
                 AddStudentToDatabase(student);  // Ajouter l'étudiant à la base de données
                 mainViewModel.StudentsViewModel.Students.Add(student);  // Mettre à jour la liste des étudiants dans le ViewModel
@@ -58,6 +57,7 @@ namespace StudentManager.Views.Pages
                         command.Parameters.AddWithValue("@DateOfBirth", student.DateOfBirth);
 
                         command.ExecuteNonQuery();
+
                     }
                 }
             }
@@ -112,7 +112,6 @@ namespace StudentManager.Views.Pages
             student.IsSelected = true;
             // Set the last selected index to the current index
             _lastSelectedIndex = ((DataGridRow)UIDataGrid.ItemContainerGenerator.ContainerFromItem(student)).GetIndex();
-            _lastSelectedState = true;
             // Raise the PropertyChanged event for SelectedStudents
             ((MainViewModel)DataContext).StudentsViewModel.RaisePropertyChanged(nameof(StudentsViewModel.SelectedStudents));
         }
@@ -121,9 +120,6 @@ namespace StudentManager.Views.Pages
         {
             var student = (Student)((CheckBox)sender).DataContext;
             student.IsSelected = false;
-            // Set the last selected index to the current index
-            _lastSelectedIndex = ((DataGridRow)UIDataGrid.ItemContainerGenerator.ContainerFromItem(student)).GetIndex();
-            _lastSelectedState = false;
             // Raise the PropertyChanged event for SelectedStudents
             ((MainViewModel)DataContext).StudentsViewModel.RaisePropertyChanged(nameof(StudentsViewModel.SelectedStudents));
         }
@@ -162,8 +158,9 @@ namespace StudentManager.Views.Pages
                         for (int i = start + offset; i <= end; i++)
                         {
                             if (dataGrid?.Items[i] is Student student)
+                            if (dataGrid?.Items[i] is Student student)
                             {
-                                student.IsSelected = _lastSelectedState;
+                                student.IsSelected = !student.IsSelected;
                             }
                         }
                     }
@@ -221,7 +218,7 @@ namespace StudentManager.Views.Pages
                         using (var command = new MySqlCommand(query, connection))
                         {
                             // Ajout du filtre avec le caractère '%' pour une recherche partielle
-                            command.Parameters.AddWithValue("@filter", $"%{filter}%");
+                            command.Parameters.AddWithValue("@filter", $"{filter}");
 
                             using (var reader = command.ExecuteReader())
                             {
@@ -308,5 +305,130 @@ namespace StudentManager.Views.Pages
                 MessageBox.Show($"Error while updating student: {ex.Message}");
             }
         }
+
+        private void MajorComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            var selectedMajor = MajorComboBoxSe.SelectedItem as Major;
+
+            // Si l'index sélectionné est 0 ou si "Tout" est sélectionné
+            if (MajorComboBoxSe.SelectedIndex == 0 || (selectedMajor != null && selectedMajor.Name == "Tout"))
+            {
+               
+                FetchAllStudents(); // Appeler la méthode pour afficher tous les étudiants
+                return;
+            }
+
+            // Cas où une autre filière est sélectionnée
+            if (selectedMajor != null)
+            {
+                string searchMajorName = selectedMajor.Name;
+                MessageBox.Show($"Recherche pour la filière : {searchMajorName}");
+
+                try
+                {
+                    using (var connection = DBConnection.GetConnection())
+                    {
+                        connection.Open();
+                        var query = @"SELECT students.Id, students.FirstName, students.LastName, students.Email, 
+                             students.MajorId, students.DateOfBirth, 
+                             majors.Name as MajorName, majors.Description as MajorDescription
+                      FROM students
+                      LEFT JOIN majors ON students.MajorId = majors.Id
+                      WHERE majors.Name = @MajorName"; // Filtrer par filière sélectionnée
+
+                        using (var command = new MySqlCommand(query, connection))
+                        {
+                            // Ajout du filtre de la filière
+                            command.Parameters.AddWithValue("@MajorName", searchMajorName);
+
+                            using (var reader = command.ExecuteReader())
+                            {
+                                var studentsFil = new List<Student>();
+
+                                while (reader.Read())
+                                {
+                                    studentsFil.Add(new Student
+                                    {
+                                        Id = reader.GetInt32("Id"),
+                                        FirstName = reader.GetString("FirstName"),
+                                        LastName = reader.GetString("LastName"),
+                                        Email = reader.GetString("Email"),
+                                        Major = new Major
+                                        {
+                                            Id = reader.GetInt32("MajorId"),
+                                            Name = reader.GetString("MajorName"),
+                                            Description = reader.GetString("MajorDescription")
+                                        },
+                                        DateOfBirth = reader.GetDateTime("DateOfBirth")
+                                    });
+                                }
+
+                                // Mise à jour de la source de données pour le DataGrid
+                                UIDataGrid.ItemsSource = studentsFil;
+                            }
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Erreur lors de la recherche : {ex.Message}");
+                }
+            }
+            else
+            {
+                MessageBox.Show("Aucune filière sélectionnée.");
+            }
+        }
+
+        // Méthode pour récupérer tous les étudiants (inchangée)
+        private void FetchAllStudents()
+        {
+            try
+            {
+                using (var connection = DBConnection.GetConnection())
+                {
+                    connection.Open();
+                    var query = @"SELECT students.Id, students.FirstName, students.LastName, students.Email, 
+                         students.MajorId, students.DateOfBirth, 
+                         majors.Name as MajorName, majors.Description as MajorDescription
+                  FROM students
+                  LEFT JOIN majors ON students.MajorId = majors.Id"; // Pas de filtre ici
+
+                    using (var command = new MySqlCommand(query, connection))
+                    {
+                        using (var reader = command.ExecuteReader())
+                        {
+                            var allStudents = new List<Student>();
+
+                            while (reader.Read())
+                            {
+                                allStudents.Add(new Student
+                                {
+                                    Id = reader.GetInt32("Id"),
+                                    FirstName = reader.GetString("FirstName"),
+                                    LastName = reader.GetString("LastName"),
+                                    Email = reader.GetString("Email"),
+                                    Major = new Major
+                                    {
+                                        Id = reader.GetInt32("MajorId"),
+                                        Name = reader.GetString("MajorName"),
+                                        Description = reader.GetString("MajorDescription")
+                                    },
+                                    DateOfBirth = reader.GetDateTime("DateOfBirth")
+                                });
+                            }
+
+                            // Mise à jour de la source de données pour le DataGrid
+                            UIDataGrid.ItemsSource = allStudents;
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Erreur lors de la récupération des étudiants : {ex.Message}");
+            }
+        }
+
     }
 }

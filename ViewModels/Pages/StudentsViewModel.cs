@@ -17,7 +17,7 @@ namespace StudentManager.ViewModels.Pages
     {
         public ObservableCollection<Student> Students { get; }
         public ObservableCollection<Student> SelectedStudents => new(Students.Where(s => s.IsSelected));
-        public ObservableCollection<Major> MajorsWithAll { get; } 
+        public ObservableCollection<Major> MajorsWithAll { get; set; }
 
         public ICommand ViewUsageInfoCommand { get; }
 
@@ -30,6 +30,7 @@ namespace StudentManager.ViewModels.Pages
             // Initialisation de la liste des étudiants
             Students = new ObservableCollection<Student>();
             LoadStudentsAsync();  // Charger les étudiants depuis la base de données
+            LoadMajorsAsync();
 
             // Subscribe to the CollectionChanged event to update the SelectedStudents property
             Students.CollectionChanged += (s, e) => RaisePropertyChanged(nameof(SelectedStudents));
@@ -93,6 +94,47 @@ namespace StudentManager.ViewModels.Pages
         private void ViewUsageInfo()
         {
             MessageBox.Show("This is a message box");
+        }
+
+        private async Task LoadMajorsAsync()
+        {
+            try
+            {
+                using (var connection = DBConnection.GetConnection())
+                {
+                    await connection.OpenAsync();
+
+                    // Requête SQL pour récupérer les étudiants et leurs majeures associées
+                    string query = "SELECT majors.Id,  majors.Name,  majors.Description FROM majors";
+
+                    using (var command = new MySqlCommand(query, connection))
+                    {
+                        using (var reader = await command.ExecuteReaderAsync())
+                        {
+                            // Boucle pour lire chaque ligne des résultats de la requête
+                            while (await reader.ReadAsync())
+                            {
+                                // Création d'un étudiant à partir des données lues
+                                var major = new Major
+                                {
+                                    Id = reader.GetInt32("Id"), // Récupérer l'Id de la majeure
+                                    Name = reader.GetString("Name"), // Récupérer le nom de la majeure
+                                    Description = reader.GetString("Description") // Récupérer la description de la majeure
+                                };
+
+                                // Ajouter l'étudiant à la collection
+                                MajorsWithAll.Add(major);
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                // Afficher un message d'erreur si la récupération échoue
+                MessageBox.Show($"Erreur lors du chargement des fiil: {ex.Message}");
+            }
+
         }
     }
 }
