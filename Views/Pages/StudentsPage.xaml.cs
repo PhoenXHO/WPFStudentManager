@@ -5,7 +5,7 @@ using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
-using StudentManager.Models;  // Assurez-vous que le modèle `Student` est bien importé
+using StudentManager.Models;
 
 namespace StudentManager.Views.Pages
 {
@@ -308,8 +308,5 @@ namespace StudentManager.Views.Pages
                 MessageBox.Show($"Error while updating student: {ex.Message}");
             }
         }
-
-
-
     }
 }

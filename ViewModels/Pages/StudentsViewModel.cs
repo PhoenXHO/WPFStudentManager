@@ -31,12 +31,11 @@ namespace StudentManager.ViewModels.Pages
             Students = new ObservableCollection<Student>();
             LoadStudentsAsync();  // Charger les étudiants depuis la base de données
 
-            // Souscrire à l'événement CollectionChanged pour mettre à jour la propriété SelectedStudents
+            // Subscribe to the CollectionChanged event to update the SelectedStudents property
             Students.CollectionChanged += (s, e) => RaisePropertyChanged(nameof(SelectedStudents));
 
             // Commande pour afficher des informations supplémentaires
             ViewUsageInfoCommand = new RelayCommand(ViewUsageInfo);
-
         }
 
         // Méthode pour charger les étudiants depuis la base de données
