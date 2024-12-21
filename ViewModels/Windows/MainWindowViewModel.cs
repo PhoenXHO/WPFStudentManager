@@ -45,13 +45,12 @@ namespace StudentManager.ViewModels.Windows
             new NavigationViewItem
             {
                 Icon = new SymbolIcon(SymbolRegular.SignOut24),
-                Content = "Déconnexion"
+                Content = "Déconnexion",
+                TargetPageType = typeof(LogoutPage)
             }
         ];
 
-
         public MainWindowViewModel()
-        {
-        }
+        {}
     }
 }

@@ -18,7 +18,6 @@
                            MenuItemsSource="{Binding MenuItems}"
                            FooterMenuItemsSource="{Binding FooterMenuItems}"
                            TitleBar="{Binding ElementName=TitleBar, Mode=OneWay}"
-                           SelectionChanged="OnNavigationSelectionChanged"
                            FrameMargin="0">
             <!--<ui:NavigationView.Header>
                 <ui:BreadcrumbBar

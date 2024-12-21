@@ -2,6 +2,8 @@
 using StudentManager.Models;
 using System.Windows;
 using Wpf.Ui.Controls;
+using System.IO;
+using System.Text.Json;
 
 namespace StudentManager.Views.Windows
 {
@@ -31,9 +33,17 @@ namespace StudentManager.Views.Windows
 
                 // Create a new data reader
                 using MySqlDataReader reader = command.ExecuteReader();
-                if (reader.HasRows)
+                if (reader.HasRows && reader.Read())
                 {
-                    System.Windows.MessageBox.Show("Login successful!");
+                    // Save session
+                    var session = new Session
+                    {
+                        UserId = reader.GetInt32("id"),
+                        Username = reader.GetString("username"),
+                        Expiry = Session.DefaultExpiry
+                    };
+                    File.WriteAllText("session.json", JsonSerializer.Serialize(session));
+
                     MainWindow mainWindow = new();
                     mainWindow.Show();
                     Close();

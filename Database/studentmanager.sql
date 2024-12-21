@@ -8,8 +8,6 @@ CREATE TABLE users (
 
 INSERT INTO users (username, password) VALUES ('admin', 'admin');
 
-SELECT * FROM users;
-
 CREATE TABLE Majors (
     Id INT AUTO_INCREMENT PRIMARY KEY,
     Name VARCHAR(255) NOT NULL,
@@ -49,3 +47,11 @@ VALUES ('John', 'Doe', '...', 1, '1990-01-01'),
 	   ('Kelly', 'Pink', '...', 3, '2002-01-01'),
 	   ('Larry', 'Brown', '...', 4, '2003-02-02'),
 	   ('Molly', 'White', '...', 5, '2004-03-03');
+
+CREATE TABLE sessions (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT,
+    username VARCHAR(255),
+    expiry TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);

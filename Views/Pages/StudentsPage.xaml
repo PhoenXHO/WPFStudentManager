@@ -78,7 +78,6 @@
                 <DataGridTextColumn Header="ID" Binding="{Binding Id}" MinWidth="30" IsReadOnly="True"/>
                 <DataGridTextColumn Header="Nom" Binding="{Binding LastName, Mode=TwoWay}" Width="*" MinWidth="60"/>
                 <DataGridTextColumn Header="Prénom" Binding="{Binding FirstName, Mode=TwoWay}" Width="*" MinWidth="60"/>
-                <!--<DataGridTextColumn Header="Filière" Binding="{Binding Major.Name, Mode=OneWay}" Width="1.5*" MinWidth="100"/>-->
 
                 <!-- Major - ComboBox -->
                 <DataGridTemplateColumn Header="Filière" Width="1.5*" MinWidth="150">
