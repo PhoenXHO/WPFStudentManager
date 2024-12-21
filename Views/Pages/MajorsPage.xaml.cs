@@ -54,9 +54,7 @@ namespace StudentManager.Views.Pages
                 command.Parameters.AddWithValue("@Name", major.Name);
                 command.Parameters.AddWithValue("@Description", major.Description);
 
-
                 command.ExecuteNonQuery();
-
             }
             catch (Exception ex)
             {
@@ -78,6 +76,47 @@ namespace StudentManager.Views.Pages
                 DeleteStudentFromDatabase(major);
                 mainViewModel.MajorsViewModel.Majors.Remove(major);
             }
+        }
+
+        private void DeleteStudentFromDatabase(Major major)
+        {
+
+            try
+            {
+                using (var connection = DBConnection.GetConnection())
+                {
+                    connection.Open();
+                    var query = "DELETE FROM Majors WHERE Id = @Id";
+                    using (var command = new MySqlCommand(query, connection))
+                    {
+                        command.Parameters.AddWithValue("@Id", major.Id);
+                        command.ExecuteNonQuery();
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Erreur lors de la suppression de la fil : {ex.Message}");
+            }
+
+        }
+
+        private void DeleteStudentFromDatabase(Major major)
+        {
+            try
+            {
+                using var connection = DBConnection.GetConnection();
+                connection?.Open();
+                var query = "DELETE FROM Majors WHERE Id = @Id";
+                using var command = new MySqlCommand(query, connection);
+                command.Parameters.AddWithValue("@Id", major.Id);
+                command.ExecuteNonQuery();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Erreur lors de la suppression de la fil : {ex.Message}");
+            }
+
         }
 
         private void DeleteStudentFromDatabase(Major major)

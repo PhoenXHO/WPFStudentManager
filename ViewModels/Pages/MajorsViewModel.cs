@@ -56,7 +56,6 @@ namespace StudentManager.ViewModels.Pages
                 // Afficher un message d'erreur si la récupération échoue
                 MessageBox.Show($"Erreur lors du chargement des fiil: {ex.Message}");
             }
-
         }
     }
 }

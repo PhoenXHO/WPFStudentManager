@@ -39,13 +39,6 @@
             <ui:TextBox x:Name="SearchTextBox" Width="200" Margin="0,0,10,0" PlaceholderText="Rechercher un étudiant" TextChanged="SearchTextBox_TextChanged"/>
         </StackPanel>
 
-        <ui:Card Grid.Row="2" Grid.Column="0" VerticalAlignment="Top" Margin="10" MinWidth="250">
-            <StackPanel>
-                <TextBlock Text="Informations sur la filière:" FontSize="16" FontWeight="Bold" Margin="10"/>
-                <TextBlock Text="This is the content of the card." Margin="10" TextWrapping="Wrap"/>
-            </StackPanel>
-        </ui:Card>
-
         <ui:DataGrid x:Name="UIDataGrid" Grid.Row="2" Grid.Column="1" AutoGenerateColumns="False" Margin="10"
                      HorizontalAlignment="Stretch"
                      VerticalAlignment="Stretch"
@@ -82,16 +75,15 @@
             </ui:DataGrid.Columns>
         </ui:DataGrid>
 
+
         <StackPanel Grid.Row="3" Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Left" Margin="0,10,0,10">
             <ui:Button Content="Ajouter" Width="100" Margin="10,0,10,0" Click="AddButton_Click"/>
             <ui:Button Content="Supprimer" Width="100" Margin="10,0,10,0" Click="DeleteButton_Click"
-                         IsEnabled="{Binding StudentsViewModel.SelectedStudents.Count,
-                                             Converter={StaticResource GreaterThanZeroConverter}}"/>
+                         IsEnabled="{Binding SelectedStudents.Count, Converter={StaticResource GreaterThanZeroConverter}}"/>
         </StackPanel>
 
-        <!-- Info button-->
         <ui:Button Grid.Row="3" Grid.Column="1" Content="" Icon="{ui:SymbolIcon Info24}" Margin="10" Appearance="Primary"
                    HorizontalAlignment="Right"
-                   Command="{Binding StudentsViewModel.ViewUsageInfoCommand}"/>
+                   Command="{Binding ViewUsageInfoCommand}"/>
     </Grid>
 </Page>

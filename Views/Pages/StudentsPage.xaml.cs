@@ -56,6 +56,8 @@ namespace StudentManager.Views.Pages
                 command.Parameters.AddWithValue("@DateOfBirth", student.DateOfBirth);
 
                 command.ExecuteNonQuery();
+                long id=command.LastInsertedId;
+                student.Id=(int)id;
             }
             catch (Exception ex)
             {
@@ -158,7 +160,7 @@ namespace StudentManager.Views.Pages
                     }
                     _lastSelectedIndex = currentIndex;
 
-                    // Cancel the left mouse button click event
+                    
                     e.Handled = true;
                 }
             }
