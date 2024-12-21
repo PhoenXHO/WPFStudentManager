@@ -35,7 +35,7 @@
             <ComboBox x:Name="MajorComboBox" Width="200" Margin="0,0,10,0" SelectedIndex="0"
                       ItemsSource="{Binding StudentsViewModel.MajorsWithAll}" DisplayMemberPath="Name"/>
             <TextBlock Text="Recherche:" VerticalAlignment="Center" Margin="0,0,10,0" Foreground="White"/>
-            <ui:TextBox x:Name="SearchTextBox" Width="200" Margin="0,0,10,0" PlaceholderText="Rechercher un étudiant"/>
+            <ui:TextBox x:Name="SearchTextBox" Width="200" Margin="0,0,10,0" PlaceholderText="Rechercher un étudiant" TextChanged="SearchTextBox_TextChanged"/>
         </StackPanel>
 
         <ui:Card Grid.Row="2" Grid.Column="0" VerticalAlignment="Top" Margin="10" MinWidth="250">
@@ -46,46 +46,47 @@
         </ui:Card>
 
         <ui:DataGrid x:Name="UIDataGrid" Grid.Row="2" Grid.Column="1" AutoGenerateColumns="False" Margin="10"
-                     ItemsSource="{Binding StudentsViewModel.Students}"
-                     SelectionMode="Extended" SelectionUnit="FullRow" IsReadOnly="False"
-                     HorizontalAlignment="Stretch" ScrollViewer.HorizontalScrollBarVisibility="Auto"
-                     CanUserAddRows="False"
-                     PreviewMouseLeftButtonDown="DataGrid_PreviewMouseLeftButtonDown"
-                     PreviewKeyDown="DataGrid_PreviewKeyDown"
-                     PreviewKeyUp="DataGrid_PreviewKeyUp">
+             ItemsSource="{Binding StudentsViewModel.Students}"
+             SelectionMode="Extended" SelectionUnit="FullRow" IsReadOnly="False"
+             HorizontalAlignment="Stretch" ScrollViewer.HorizontalScrollBarVisibility="Auto"
+             CanUserAddRows="False"
+             PreviewMouseLeftButtonDown="DataGrid_PreviewMouseLeftButtonDown"
+             PreviewKeyDown="DataGrid_PreviewKeyDown"
+             PreviewKeyUp="DataGrid_PreviewKeyUp"
+             MouseDoubleClick="DataGrid_MouseDoubleClick">
+
             <DataGrid.Columns>
                 <DataGridTemplateColumn Width="30" MaxWidth="30" MinWidth="30">
                     <DataGridTemplateColumn.Header>
                         <CheckBox x:Name="SelectAllCheckBox" Content="Tout sélectionner" ToolTip="Sélectionner tous les étudiants"
-                                  Checked="SelectAllCheckBox_Checked" Unchecked="SelectAllCheckBox_Unchecked"/>
+                          Checked="SelectAllCheckBox_Checked" Unchecked="SelectAllCheckBox_Unchecked"/>
                     </DataGridTemplateColumn.Header>
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
                             <CheckBox IsChecked="{Binding IsSelected, Mode=TwoWay}"
-                                      Checked="CheckBox_Checked" Unchecked="CheckBox_Unchecked"/>
+                              Checked="CheckBox_Checked" Unchecked="CheckBox_Unchecked"/>
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
-                <DataGridTextColumn Header="ID" Binding="{Binding Id}" MinWidth="30"/>
-                <DataGridTextColumn Header="Nom" Binding="{Binding LastName}" Width="*" MinWidth="60"/>
-                <DataGridTextColumn Header="Prénom" Binding="{Binding FirstName}" Width="*" MinWidth="60"/>
-                <DataGridTextColumn Header="Filière" Binding="{Binding Major.Name}" Width="1.5*" MinWidth="100"/>
-                <DataGridTextColumn Header="Date de naissance" Binding="{Binding DateOfBirth}" Width="3*" MinWidth="150"/>
-                <DataGridTextColumn Header="Email" Binding="{Binding Email}" Width="3*" MinWidth="200"/>
+                <DataGridTextColumn Header="ID" Binding="{Binding Id}" MinWidth="30" IsReadOnly="True"/>
+                <DataGridTextColumn Header="Nom" Binding="{Binding LastName, Mode=TwoWay}" Width="*" MinWidth="60"/>
+                <DataGridTextColumn Header="Prénom" Binding="{Binding FirstName, Mode=TwoWay}" Width="*" MinWidth="60"/>
+                <DataGridTextColumn Header="Filière" Binding="{Binding Major.Name, Mode=OneWay}" Width="1.5*" MinWidth="100"/>
+                <DataGridTextColumn Header="Date de naissance" Binding="{Binding DateOfBirth, Mode=TwoWay}" Width="3*" MinWidth="150"/>
+                <DataGridTextColumn Header="Email" Binding="{Binding Email, Mode=TwoWay}" Width="3*" MinWidth="200"/>
             </DataGrid.Columns>
         </ui:DataGrid>
 
         <StackPanel Grid.Row="3" Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Left" Margin="0,10,0,10">
             <ui:Button Content="Ajouter" Width="100" Margin="10,0,10,0" Click="AddButton_Click"/>
-            <!--<ui:Button Content="Modifier" Width="100" Margin="10,0,10,0"/>-->
             <ui:Button Content="Supprimer" Width="100" Margin="10,0,10,0" Click="DeleteButton_Click"
                          IsEnabled="{Binding StudentsViewModel.SelectedStudents.Count,
                                              Converter={StaticResource GreaterThanZeroConverter}}"/>
         </StackPanel>
-
+        
         <!-- Info button-->
         <ui:Button Grid.Row="3" Grid.Column="1" Content="" Icon="{ui:SymbolIcon Info24}" Margin="10" Appearance="Primary"
                    HorizontalAlignment="Right"
                    Command="{Binding StudentsViewModel.ViewUsageInfoCommand}"/>
     </Grid>
-    </Page>
+</Page>

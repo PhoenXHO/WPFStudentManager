@@ -5,7 +5,7 @@ namespace StudentManager.ViewModels
 {
     class MainViewModel : ViewModelBase
     {
-        public StudentsViewModel StudentsViewModel { get; }
+        public StudentsViewModel StudentsViewModel { get; set; }
         public MajorsViewModel MajorsViewModel { get; }
         public StatsViewModel StatsViewModel { get; }
 
