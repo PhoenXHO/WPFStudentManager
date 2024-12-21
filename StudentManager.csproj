@@ -23,8 +23,9 @@
     <PackageReference Include="MySql.Data" Version="9.1.0" />
     <PackageReference Include="OxyPlot.Wpf" Version="2.2.0" />
     <PackageReference Include="OxyPlot.Wpf.Shared" Version="2.2.0" />
-    <PackageReference Include="telerik.ui.for.wpf.netcore.xaml" Version="2023.1.117" />
     <PackageReference Include="WPF-UI" Version="3.0.5" />
+	  <PackageReference Include="telerik.ui.for.wpf.netcore.xaml" Version="2023.1.117" />
+
   </ItemGroup>
 
   <ItemGroup>

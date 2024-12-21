@@ -14,82 +14,48 @@ namespace StudentManager.ViewModels.Pages
         public ObservableCollection<Major> Majors { get; }
         public ObservableCollection<Major> SelectedMajors => new(Majors.Where(m => m.IsSelected));
 
-        public ICommand ViewDetailsCommand { get; }
-
-        public List<Major> MajorsWithAll => new List<Major>
-{
-    new Major
-    {
-        Id = 0,
-        Name = "Toutes les filières",
-        Description = string.Empty // Valeur par défaut pour la description
-    }
-}.Concat(Majors).ToList();
-
-
-
         public MajorsViewModel()
         {
 
-            Majors = new ObservableCollection<Major>();
-            LoadMajorsAsync();
-            
+            Majors = [];
+            _ = LoadMajorsAsync();
 
-
-            Majors.CollectionChanged += (m, e) => RaisePropertyChanged(nameof(SelectedMajors)); // Update SelectedMajors when Majors changes
-
-            ViewDetailsCommand = new RelayCommand<Major>(ViewDetails);
+            // Update SelectedMajors when Majors changes
+            Majors.CollectionChanged += (m, e) => RaisePropertyChanged(nameof(SelectedMajors));
         }
-
-
 
         private async Task LoadMajorsAsync()
         {
             try
             {
-                using (var connection = DBConnection.GetConnection())
+                using var connection = DBConnection.GetConnection();
+                await connection.OpenAsync();
+
+                // Requête SQL pour récupérer les étudiants et leurs majeures associées
+                string query = "SELECT majors.Id,  majors.Name,  majors.Description FROM majors";
+
+                using var command = new MySqlCommand(query, connection);
+                using var reader = await command.ExecuteReaderAsync();
+                // Boucle pour lire chaque ligne des résultats de la requête
+                while (await reader.ReadAsync())
                 {
-                    await connection.OpenAsync();
-
-                    string query = "SELECT majors.Id,  majors.Name,  majors.Description FROM majors";
-
-                    using (var command = new MySqlCommand(query, connection))
+                    // Création d'un étudiant à partir des données lues
+                    var major = new Major
                     {
-                        using (var reader = await command.ExecuteReaderAsync())
-                        {
-                            
-                            while (await reader.ReadAsync())
-                            {
-                                
-                                var major = new Major
-                                {
-                                    Id = reader.GetInt32("Id"), 
-                                    Name = reader.GetString("Name"), 
-                                    Description = reader.GetString("Description") 
-                                };
+                        Id = reader.GetInt32("Id"), // Récupérer l'Id de la majeure
+                        Name = reader.GetString("Name"), // Récupérer le nom de la majeure
+                        Description = reader.GetString("Description") // Récupérer la description de la majeure
+                    };
 
-                                
-                                Majors.Add(major);
-                            }
-                        }
-                    }
+                    // Ajouter l'étudiant à la collection
+                    Majors.Add(major);
                 }
             }
             catch (Exception ex)
             {
-               
+                // Afficher un message d'erreur si la récupération échoue
                 MessageBox.Show($"Erreur lors du chargement des fiil: {ex.Message}");
             }
-
-        }
-
-
-
-
-        private void ViewDetails(Major major)
-        {
-            
-            MessageBox.Show($"Viewing details for {major.Name}");
         }
     }
 }

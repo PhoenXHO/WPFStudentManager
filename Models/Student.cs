@@ -7,9 +7,9 @@ namespace StudentManager.Models
         public event PropertyChangedEventHandler? PropertyChanged;
 
         private int _id;
-        private string _firstName;
-        private string _lastName;
-        private string _email;
+        private string? _firstName;
+        private string? _lastName;
+        private string? _email;
         private Major? _major;
         private DateTime? _dateOfBirth;
 		private bool _isSelected;
@@ -26,7 +26,7 @@ namespace StudentManager.Models
 				}
 			}
 		}
-        public required string FirstName
+        public required string? FirstName
 		{
 			get => _firstName;
 			init
@@ -38,7 +38,7 @@ namespace StudentManager.Models
 				}
 			}
 		}
-		public required string LastName
+		public required string? LastName
 		{
 			get => _lastName;
 			init
@@ -50,7 +50,7 @@ namespace StudentManager.Models
 				}
 			}
 		}
-		public required string Email
+		public required string? Email
 		{
 			get => _email;
 			init
