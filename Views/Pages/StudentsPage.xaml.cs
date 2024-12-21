@@ -5,7 +5,7 @@ using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
-using StudentManager.Models;  // Assurez-vous que le modèle Student est bien importé
+using StudentManager.Models;
 
 namespace StudentManager.Views.Pages
 {
@@ -157,6 +157,7 @@ namespace StudentManager.Views.Pages
                         int offset = (start <= end) ? 1 : -1; // Skip the last selected index
                         for (int i = start + offset; i <= end; i++)
                         {
+                            if (dataGrid?.Items[i] is Student student)
                             if (dataGrid?.Items[i] is Student student)
                             {
                                 student.IsSelected = !student.IsSelected;

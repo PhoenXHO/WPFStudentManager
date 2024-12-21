@@ -32,7 +32,7 @@ namespace StudentManager.ViewModels.Pages
             LoadStudentsAsync();  // Charger les étudiants depuis la base de données
             LoadMajorsAsync();
 
-            // Souscrire à l'événement CollectionChanged pour mettre à jour la propriété SelectedStudents
+            // Subscribe to the CollectionChanged event to update the SelectedStudents property
             Students.CollectionChanged += (s, e) => RaisePropertyChanged(nameof(SelectedStudents));
 
             // Commande pour afficher des informations supplémentaires
@@ -48,7 +48,7 @@ namespace StudentManager.ViewModels.Pages
                 {
                     await connection.OpenAsync();
 
-
+                    // Requête SQL pour récupérer les étudiants et leurs majeures associées
                     string query = "SELECT students.Id, students.FirstName, students.LastName, students.Email, students.MajorId, students.DateOfBirth, majors.Name as MajorName, majors.Description as MajorDescription " +
                                    "FROM students LEFT JOIN majors ON students.MajorId = majors.Id";
 
@@ -56,7 +56,7 @@ namespace StudentManager.ViewModels.Pages
                     {
                         using (var reader = await command.ExecuteReaderAsync())
                         {
-
+                            // Boucle pour lire chaque ligne des résultats de la requête
                             while (await reader.ReadAsync())
                             {
                                 // Création d'un étudiant à partir des données lues
@@ -95,11 +95,6 @@ namespace StudentManager.ViewModels.Pages
         {
             MessageBox.Show("This is a message box");
         }
-
-
-
-
-
 
         private async Task LoadMajorsAsync()
         {
@@ -141,12 +136,5 @@ namespace StudentManager.ViewModels.Pages
             }
 
         }
-
-
-
-
-
-
-
     }
 }
