@@ -71,9 +71,10 @@
             <ui:Button Content="Supprimer" Width="100" Margin="10,0,10,0" Click="DeleteButton_Click"
                          IsEnabled="{Binding SelectedStudents.Count, Converter={StaticResource GreaterThanZeroConverter}}"/>
         </StackPanel>
-
+        
+        <!-- Info button-->
         <ui:Button Grid.Row="3" Grid.Column="1" Content="" Icon="{ui:SymbolIcon Info24}" Margin="10" Appearance="Primary"
                    HorizontalAlignment="Right"
                    Command="{Binding ViewUsageInfoCommand}"/>
     </Grid>
-</Page>
+    </Page>

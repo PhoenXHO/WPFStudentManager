@@ -17,7 +17,7 @@ namespace StudentManager.ViewModels.Pages
     {
         public ObservableCollection<Student> Students { get; }
         public ObservableCollection<Student> SelectedStudents => new(Students.Where(s => s.IsSelected));
-        public ObservableCollection<Major> MajorsWithAll { get; }
+        public ObservableCollection<Major> MajorsWithAll { get; } 
 
         public ICommand ViewUsageInfoCommand { get; }
 
@@ -36,6 +36,7 @@ namespace StudentManager.ViewModels.Pages
 
             // Commande pour afficher des informations supplémentaires
             ViewUsageInfoCommand = new RelayCommand(ViewUsageInfo);
+
         }
 
         // Méthode pour charger les étudiants depuis la base de données

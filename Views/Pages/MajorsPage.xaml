@@ -5,9 +5,14 @@
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
       xmlns:local="clr-namespace:StudentManager.Views.Pages"
       xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+      xmlns:converters="clr-namespace:StudentManager.Converters"
       mc:Ignorable="d" 
       d:DesignHeight="450" d:DesignWidth="800"
       Title="MajorsPage">
+
+    <Page.Resources>
+        <converters:GreaterThanZeroConverter x:Key="GreaterThanZeroConverter"/>
+    </Page.Resources>
 
     <Grid Margin="10">
         <Grid.RowDefinitions>
@@ -20,7 +25,7 @@
                    FontSize="24" FontWeight="Bold" Margin="0,10,0,30" Foreground="White"
                    TextAlignment="Center"/>
 
-        <ItemsControl Grid.Row="1" ItemsSource="{Binding Majors}">
+        <ItemsControl Grid.Row="1" ItemsSource="{Binding MajorsViewModel.Majors}">
             <ItemsControl.ItemsPanel>
                 <ItemsPanelTemplate>
                     <WrapPanel/>
@@ -30,6 +35,8 @@
                 <DataTemplate>
                     <ui:Card Margin="10" Padding="10" MinWidth="250">
                         <StackPanel>
+                            <CheckBox IsChecked="{Binding IsSelected, Mode=TwoWay}"
+                                Checked="CheckBox_Checked" Unchecked="CheckBox_Unchecked"/>
                             <TextBlock Text="{Binding Name}" FontSize="16" FontWeight="Bold" Margin="10"/>
                             <TextBlock Text="{Binding Description}" Margin="10" TextWrapping="Wrap"/>
                             <Button Content="View Details"
@@ -43,9 +50,11 @@
         </ItemsControl>
 
         <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,10,0,10">
-            <ui:Button Content="Ajouter" Width="100" Margin="10,0,10,0"/>
+            <ui:Button Content="Ajouter" Width="100" Margin="10,0,10,0" Click="AddButton_Click"/>
             <ui:Button Content="Modifier" Width="100" Margin="10,0,10,0"/>
-            <ui:Button Content="Supprimer" Width="100" Margin="10,0,10,0"/>
+            <ui:Button x:Name="DeleteButton" Content="Supprimer" Width="100" Margin="10,0,10,0" Click="DeleteButton_Click"
+                         IsEnabled="{Binding MajorsViewModel.SelectedMajors.Count,
+                                             Converter={StaticResource GreaterThanZeroConverter}}"/>
         </StackPanel>
     </Grid>
 </Page>
