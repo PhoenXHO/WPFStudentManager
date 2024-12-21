@@ -73,35 +73,12 @@ namespace StudentManager.Views.Pages
             var selectedMajors = mainViewModel.MajorsViewModel.Majors.Where(m => m.IsSelected).ToList();
             foreach (var major in selectedMajors)
             {
-                DeleteStudentFromDatabase(major);
+                DeleteMajorFromDatabase(major);
                 mainViewModel.MajorsViewModel.Majors.Remove(major);
             }
         }
 
-        private void DeleteStudentFromDatabase(Major major)
-        {
-
-            try
-            {
-                using (var connection = DBConnection.GetConnection())
-                {
-                    connection.Open();
-                    var query = "DELETE FROM Majors WHERE Id = @Id";
-                    using (var command = new MySqlCommand(query, connection))
-                    {
-                        command.Parameters.AddWithValue("@Id", major.Id);
-                        command.ExecuteNonQuery();
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Erreur lors de la suppression de la fil : {ex.Message}");
-            }
-
-        }
-
-        private void DeleteStudentFromDatabase(Major major)
+        private static void DeleteMajorFromDatabase(Major major)
         {
             try
             {
@@ -116,25 +93,6 @@ namespace StudentManager.Views.Pages
             {
                 MessageBox.Show($"Erreur lors de la suppression de la fil : {ex.Message}");
             }
-
-        }
-
-        private void DeleteStudentFromDatabase(Major major)
-        {
-            try
-            {
-                using var connection = DBConnection.GetConnection();
-                connection?.Open();
-                var query = "DELETE FROM Majors WHERE Id = @Id";
-                using var command = new MySqlCommand(query, connection);
-                command.Parameters.AddWithValue("@Id", major.Id);
-                command.ExecuteNonQuery();
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Erreur lors de la suppression de la fil : {ex.Message}");
-            }
-
         }
 
         private void CheckBox_Checked(object sender, RoutedEventArgs e)

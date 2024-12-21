@@ -26,11 +26,13 @@
                    TextAlignment="Center"/>
 
         <ItemsControl Grid.Row="1" ItemsSource="{Binding MajorsViewModel.Majors}">
-            <ItemsControl.ItemsPanel>
-                <ItemsPanelTemplate>
-                    <WrapPanel/>
-                </ItemsPanelTemplate>
-            </ItemsControl.ItemsPanel>
+            <ItemsControl.Template>
+                <ControlTemplate>
+                    <ScrollViewer VerticalScrollBarVisibility="Auto" MaxHeight="600">
+                        <WrapPanel IsItemsHost="True" Orientation="Horizontal"/>
+                    </ScrollViewer>
+                </ControlTemplate>
+            </ItemsControl.Template>
             <ItemsControl.ItemTemplate>
                 <DataTemplate>
                     <ui:Card Margin="10" Padding="10" MinWidth="250">
