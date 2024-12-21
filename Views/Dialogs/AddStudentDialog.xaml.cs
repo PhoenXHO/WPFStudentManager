@@ -33,5 +33,10 @@ namespace StudentManager.Views.Dialogs
         {
             DialogResult = false;
         }
+
+        private void MajorComboBox_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
+        {
+
+        }
     }
 }

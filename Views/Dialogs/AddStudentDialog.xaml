@@ -49,7 +49,7 @@
 
             <TextBlock Text="Filière:" Grid.Row="6" Margin="0,0,0,5"/>
             <ComboBox x:Name="MajorComboBox" Grid.Row="7" Margin="0,0,0,10"
-                      ItemsSource="{Binding Majors}" DisplayMemberPath="Name"/>
+                      ItemsSource="{Binding Majors}" DisplayMemberPath="Name" SelectionChanged="MajorComboBox_SelectionChanged"/>
 
             <TextBlock Text="Date de naissance:" Grid.Row="8" Margin="0,0,0,5"/>
             <DatePicker x:Name="DateOfBirthPicker" Grid.Row="9" Margin="0,0,0,10"/>
