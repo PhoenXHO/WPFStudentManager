@@ -17,7 +17,7 @@ namespace StudentManager.Models
         public int Id
 		{
 			get => _id;
-			init
+			set
 			{
 				if (_id != value)
 				{

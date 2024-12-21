@@ -1,10 +1,15 @@
-﻿using StudentManager.Models;
+﻿using Microsoft.OData.Client;
+using MySql.Data.MySqlClient;
+using SharpDX.Direct3D9;
+using StudentManager.Models;
 using StudentManager.ViewModels;
 using StudentManager.ViewModels.Pages;
 using System.Collections.ObjectModel;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using static System.Net.Mime.MediaTypeNames;
+using Telerik.Windows.Documents.Spreadsheet.Expressions.Functions;
 
 namespace StudentManager.Views.Pages
 {
@@ -14,7 +19,7 @@ namespace StudentManager.Views.Pages
     public partial class MajorsPage : Page
     {
         public MajorsViewModel ViewModel { get; set; }
-
+        private bool _isShiftPressed;
         private int _lastSelectedIndex = -1;
 
         public MajorsPage()
@@ -32,7 +37,34 @@ namespace StudentManager.Views.Pages
             };
             if (dialog.ShowDialog() == true)
             {
-                mainViewModel.MajorsViewModel.Majors.Add(dialog.NewMajor);
+                var major = dialog.NewMajor;
+                AddMajorToDatabase(major);
+
+                mainViewModel.MajorsViewModel.Majors.Add(major);
+            }
+        }
+        private void AddMajorToDatabase(Major major)
+        {
+            try
+            {
+                using (var connection = DBConnection.GetConnection())
+                {
+                    connection.Open();
+                    var query = "INSERT INTO majors (Name, Description) VALUES (@Name, @Description)";
+                    using (var command = new MySqlCommand(query, connection))
+                    {
+                        command.Parameters.AddWithValue("@Name", major.Name);
+                        command.Parameters.AddWithValue("@Description", major.Description);
+
+
+                        command.ExecuteNonQuery();
+                    }
+                }
+
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Erreur lors de l'ajout de l fill : {ex.Message}");
             }
         }
 
@@ -47,8 +79,36 @@ namespace StudentManager.Views.Pages
             var selectedMajors = mainViewModel.MajorsViewModel.Majors.Where(m => m.IsSelected).ToList();
             foreach (var major in selectedMajors)
             {
+                DeleteStudentFromDatabase(major);
                 mainViewModel.MajorsViewModel.Majors.Remove(major);
             }
+
+
+
+
+        }
+
+        private void DeleteStudentFromDatabase(Major major)
+        {
+
+            try
+            {
+                using (var connection = DBConnection.GetConnection())
+                {
+                    connection.Open();
+                    var query = "DELETE FROM Majors WHERE Id = @Id";
+                    using (var command = new MySqlCommand(query, connection))
+                    {
+                        command.Parameters.AddWithValue("@Id", major.Id);
+                        command.ExecuteNonQuery();
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Erreur lors de la suppression de la fil : {ex.Message}");
+            }
+
         }
 
         private void CheckBox_Checked(object sender, RoutedEventArgs e)
@@ -89,7 +149,7 @@ namespace StudentManager.Views.Pages
             DeleteButton.IsEnabled = mainViewModel.MajorsViewModel.Majors.Any(m => m.IsSelected);
         }
 
-        
+
         private void InfoButton_Click(object sender, RoutedEventArgs e)
         {
             var major = (Major)((Button)sender).DataContext;

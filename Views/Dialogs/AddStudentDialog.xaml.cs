@@ -1,6 +1,8 @@
 ﻿using StudentManager.Models;
+using StudentManager.ViewModels;
 using System.Windows;
 using Wpf.Ui.Controls;
+
 
 namespace StudentManager.Views.Dialogs
 {
@@ -18,20 +20,35 @@ namespace StudentManager.Views.Dialogs
 
         private void AddButton_Click(object sender, RoutedEventArgs e)
         {
-            NewStudent = new Student
+            if (MajorComboBox.SelectedItem is Major selectedMajor)
             {
-                FirstName = FirstNameTextBox.Text,
-                LastName = LastNameTextBox.Text,
-                Email = EmailTextBox.Text,
-                Major = (Major)MajorComboBox.SelectedItem,
-                DateOfBirth = DateOfBirthPicker.SelectedDate
-            };
-            DialogResult = true;
+                NewStudent = new Student
+                {
+                    FirstName = FirstNameTextBox.Text,
+                    LastName = LastNameTextBox.Text,
+                    Email = EmailTextBox.Text,
+                    Major = selectedMajor, 
+                    DateOfBirth = DateOfBirthPicker.SelectedDate
+                };
+                DialogResult = true;
+            }
+            else
+            {
+                System.Windows.MessageBox.Show("Veuillez sélectionner une filière.");
+            }
         }
 
         private void CancelButton_Click(object sender, RoutedEventArgs e)
         {
             DialogResult = false;
         }
+
+       private void MajorComboBox_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
+        {
+            
+        }
+       
+
+        
     }
 }

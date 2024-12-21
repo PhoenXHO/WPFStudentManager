@@ -1,7 +1,9 @@
 ﻿using GalaSoft.MvvmLight;
 using GalaSoft.MvvmLight.Command;
+using MySql.Data.MySqlClient;
 using StudentManager.Models;
 using System.Collections.ObjectModel;
+using System.Data;
 using System.Windows;
 using System.Windows.Input;
 
@@ -14,25 +16,79 @@ namespace StudentManager.ViewModels.Pages
 
         public ICommand ViewDetailsCommand { get; }
 
+        public List<Major> MajorsWithAll => new List<Major>
+{
+    new Major
+    {
+        Id = 0,
+        Name = "Toutes les filières",
+        Description = string.Empty // Valeur par défaut pour la description
+    }
+}.Concat(Majors).ToList();
+
+
+
         public MajorsViewModel()
         {
-            //TODO: Replace with data from a database (start ids from 1 so that the `All` item can have an id of 0)
-            Majors =
-            [
-                new Major { Id = 1, Name = "Computer Science", Description = "Computer Science" },
-                new Major { Id = 2, Name = "Mathematics", Description = "Mathematics" },
-                new Major { Id = 3, Name = "Physics", Description = "Physics" },
-                new Major { Id = 4, Name = "Chemistry", Description = "Chemistry" }
-            ];
+
+            Majors = new ObservableCollection<Major>();
+            LoadMajorsAsync();
+            
+
 
             Majors.CollectionChanged += (m, e) => RaisePropertyChanged(nameof(SelectedMajors)); // Update SelectedMajors when Majors changes
 
             ViewDetailsCommand = new RelayCommand<Major>(ViewDetails);
         }
 
+
+
+        private async Task LoadMajorsAsync()
+        {
+            try
+            {
+                using (var connection = DBConnection.GetConnection())
+                {
+                    await connection.OpenAsync();
+
+                    string query = "SELECT majors.Id,  majors.Name,  majors.Description FROM majors";
+
+                    using (var command = new MySqlCommand(query, connection))
+                    {
+                        using (var reader = await command.ExecuteReaderAsync())
+                        {
+                            
+                            while (await reader.ReadAsync())
+                            {
+                                
+                                var major = new Major
+                                {
+                                    Id = reader.GetInt32("Id"), 
+                                    Name = reader.GetString("Name"), 
+                                    Description = reader.GetString("Description") 
+                                };
+
+                                
+                                Majors.Add(major);
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+               
+                MessageBox.Show($"Erreur lors du chargement des fiil: {ex.Message}");
+            }
+
+        }
+
+
+
+
         private void ViewDetails(Major major)
         {
-            // For now, just show a message box
+            
             MessageBox.Show($"Viewing details for {major.Name}");
         }
     }
