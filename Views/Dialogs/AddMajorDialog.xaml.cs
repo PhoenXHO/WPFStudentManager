@@ -21,7 +21,7 @@ namespace StudentManager.Views.Dialogs
     /// </summary>
     public partial class AddMajorDialog : FluentWindow
     {
-        public Major NewMajor { get; private set; }
+        public Major NewMajor { get; set; }
 
         public AddMajorDialog()
         {

@@ -39,10 +39,7 @@
                                 Checked="CheckBox_Checked" Unchecked="CheckBox_Unchecked"/>
                             <TextBlock Text="{Binding Name}" FontSize="16" FontWeight="Bold" Margin="10"/>
                             <TextBlock Text="{Binding Description}" Margin="10" TextWrapping="Wrap"/>
-                            <Button Content="View Details"
-                                    Command="{Binding DataContext.ViewDetailsCommand,
-                                                      RelativeSource={RelativeSource AncestorType=ItemsControl}}"
-                                    CommandParameter="{Binding}" Margin="0,10,0,0"/>
+                            <Button Content="View Details" Margin="0,10,0,0" Click="ViewDetailsButton_Click"/>
                         </StackPanel>
                     </ui:Card>
                 </DataTemplate>
@@ -51,7 +48,6 @@
 
         <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,10,0,10">
             <ui:Button Content="Ajouter" Width="100" Margin="10,0,10,0" Click="AddButton_Click"/>
-            <ui:Button Content="Modifier" Width="100" Margin="10,0,10,0"/>
             <ui:Button x:Name="DeleteButton" Content="Supprimer" Width="100" Margin="10,0,10,0" Click="DeleteButton_Click"
                          IsEnabled="{Binding MajorsViewModel.SelectedMajors.Count,
                                              Converter={StaticResource GreaterThanZeroConverter}}"/>

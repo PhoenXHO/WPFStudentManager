@@ -4,10 +4,10 @@ namespace StudentManager.Models
 {
     public class Stats : INotifyPropertyChanged
     {
-        private string _major;
+        private string? _major;
         private int _studentCount;
 
-        public string Major
+        public string? Major
         {
             get => _major;
             set

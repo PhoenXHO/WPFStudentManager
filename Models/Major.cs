@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.ComponentModel;
 
 namespace StudentManager.Models
 {
@@ -12,8 +7,8 @@ namespace StudentManager.Models
         public event PropertyChangedEventHandler? PropertyChanged;
 
         private int _id;
-        private string _name;
-        private string _description;
+        private string? _name;
+        private string? _description;
         private bool _isSelected;
 
 
@@ -29,7 +24,7 @@ namespace StudentManager.Models
 				}
 			}
 		}
-        public required string Name
+        public required string? Name
 		{
 			get => _name;
 			set
@@ -41,7 +36,7 @@ namespace StudentManager.Models
 				}
 			}
 		}
-        public required string Description
+        public required string? Description
 		{
 			get => _description;
 			set

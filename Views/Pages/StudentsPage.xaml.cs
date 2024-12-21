@@ -35,8 +35,8 @@ namespace StudentManager.Views.Pages
             {
 
                 var student = dialog.NewStudent;
-                AddStudentToDatabase(student);  // Ajouter l'étudiant à la base de données
-                mainViewModel.StudentsViewModel.Students.Add(student);  // Mettre à jour la liste des étudiants dans le ViewModel
+                AddStudentToDatabase(student);
+                mainViewModel.StudentsViewModel.Students.Add(student);
             }
         }
 
@@ -44,22 +44,18 @@ namespace StudentManager.Views.Pages
         {
             try
             {
-                using (var connection = DBConnection.GetConnection())
-                {
-                    connection.Open();
-                    var query = "INSERT INTO students (FirstName, LastName, Email, MajorId, DateOfBirth) VALUES (@FirstName, @LastName, @Email, @MajorId, @DateOfBirth)";
-                    using (var command = new MySqlCommand(query, connection))
-                    {
-                        command.Parameters.AddWithValue("@FirstName", student.FirstName);
-                        command.Parameters.AddWithValue("@LastName", student.LastName);
-                        command.Parameters.AddWithValue("@Email", student.Email);
-                        command.Parameters.AddWithValue("@MajorId", student.Major.Id);
-                        command.Parameters.AddWithValue("@DateOfBirth", student.DateOfBirth);
+                using var connection = DBConnection.GetConnection();
+                connection?.Open();
+                var query = @"INSERT INTO students (FirstName, LastName, Email, MajorId, DateOfBirth)
+                              VALUES (@FirstName, @LastName, @Email, @MajorId, @DateOfBirth)";
+                using var command = new MySqlCommand(query, connection);
+                command.Parameters.AddWithValue("@FirstName", student.FirstName);
+                command.Parameters.AddWithValue("@LastName", student.LastName);
+                command.Parameters.AddWithValue("@Email", student.Email);
+                command.Parameters.AddWithValue("@MajorId", student.Major?.Id);
+                command.Parameters.AddWithValue("@DateOfBirth", student.DateOfBirth);
 
-                        command.ExecuteNonQuery();
-
-                    }
-                }
+                command.ExecuteNonQuery();
             }
             catch (Exception ex)
             {
@@ -73,9 +69,10 @@ namespace StudentManager.Views.Pages
             var selectedStudents = mainViewModel.StudentsViewModel.Students.Where(s => s.IsSelected).ToList();
             foreach (var student in selectedStudents)
             {
-                // Supprimer l'étudiant de la base de données
+                // Remove the student from the database
                 DeleteStudentFromDatabase(student);
-                mainViewModel.StudentsViewModel.Students.Remove(student);  // Supprimer de la liste dans le ViewModel
+                // Remove the student from the Students collection
+                mainViewModel.StudentsViewModel.Students.Remove(student);
             }
 
             // Uncheck the Select All checkbox if all students are unselected
@@ -89,16 +86,12 @@ namespace StudentManager.Views.Pages
         {
             try
             {
-                using (var connection = DBConnection.GetConnection())
-                {
-                    connection.Open();
-                    var query = "DELETE FROM students WHERE Id = @Id";
-                    using (var command = new MySqlCommand(query, connection))
-                    {
-                        command.Parameters.AddWithValue("@Id", student.Id);
-                        command.ExecuteNonQuery();
-                    }
-                }
+                using var connection = DBConnection.GetConnection();
+                connection?.Open();
+                var query = "DELETE FROM students WHERE Id = @Id";
+                using var command = new MySqlCommand(query, connection);
+                command.Parameters.AddWithValue("@Id", student.Id);
+                command.ExecuteNonQuery();
             }
             catch (Exception ex)
             {
@@ -189,7 +182,6 @@ namespace StudentManager.Views.Pages
 
         private void InfoButton_Click(object sender, RoutedEventArgs e)
         {
-            var mainViewModel = (MainViewModel)DataContext;
             var student = (Student)((Button)sender).DataContext;
             MessageBox.Show($"Viewing details for {student.FirstName} {student.LastName}");
         }
@@ -202,50 +194,42 @@ namespace StudentManager.Views.Pages
 
                 try
                 {
-                    using (var connection = DBConnection.GetConnection())
+                    using var connection = DBConnection.GetConnection();
+                    connection?.Open();
+                    var query = @"SELECT students.Id, students.FirstName, students.LastName, students.Email, 
+                                  students.MajorId, students.DateOfBirth, majors.Name as MajorName, majors.Description as MajorDescription
+                                  FROM students
+                                  LEFT JOIN majors ON students.MajorId = majors.Id
+                                  WHERE CAST(students.Id AS CHAR) LIKE @filter 
+                                  OR students.FirstName LIKE @filter 
+                                  OR students.LastName LIKE @filter";
+
+                    using var command = new MySqlCommand(query, connection);
+                    command.Parameters.AddWithValue("@filter", $"{filter}");
+
+                    using var reader = command.ExecuteReader();
+                    var students = new List<Student>();
+
+                    while (reader.Read())
                     {
-                        connection.Open();
-                        var query = @"SELECT students.Id, students.FirstName, students.LastName, students.Email, 
-                                     students.MajorId, students.DateOfBirth, 
-                                     majors.Name as MajorName, majors.Description as MajorDescription
-                              FROM students
-                              LEFT JOIN majors ON students.MajorId = majors.Id
-                              WHERE CAST(students.Id AS CHAR) LIKE @filter 
-                                 OR students.FirstName LIKE @filter 
-                                 OR students.LastName LIKE @filter";
-
-                        using (var command = new MySqlCommand(query, connection))
+                        students.Add(new Student
                         {
-                            // Ajout du filtre avec le caractère '%' pour une recherche partielle
-                            command.Parameters.AddWithValue("@filter", $"{filter}");
-
-                            using (var reader = command.ExecuteReader())
+                            Id = reader.GetInt32("Id"),
+                            FirstName = reader.GetString("FirstName"),
+                            LastName = reader.GetString("LastName"),
+                            Email = reader.GetString("Email"),
+                            Major = new Major
                             {
-                                var students = new List<Student>();
-
-                                while (reader.Read())
-                                {
-                                    students.Add(new Student
-                                    {
-                                        Id = reader.GetInt32("Id"),
-                                        FirstName = reader.GetString("FirstName"),
-                                        LastName = reader.GetString("LastName"),
-                                        Email = reader.GetString("Email"),
-                                        Major = new Major
-                                        {
-                                            Id = reader.GetInt32("MajorId"),
-                                            Name = reader.GetString("MajorName"),
-                                            Description = reader.GetString("MajorDescription")
-                                        },
-                                        DateOfBirth = reader.GetDateTime("DateOfBirth")
-                                    });
-                                }
-
-                                // Mise à jour de la source de données pour le DataGrid
-                                UIDataGrid.ItemsSource = students;
-                            }
-                        }
+                                Id = reader.GetInt32("MajorId"),
+                                Name = reader.GetString("MajorName"),
+                                Description = reader.GetString("MajorDescription")
+                            },
+                            DateOfBirth = reader.GetDateTime("DateOfBirth")
+                        });
                     }
+
+                    // Update the DataGrid's ItemsSource
+                    UIDataGrid.ItemsSource = students;
                 }
                 catch (Exception ex)
                 {
@@ -254,13 +238,12 @@ namespace StudentManager.Views.Pages
             }
         }
 
-        // Événement qui se déclenche lors du double-clic sur une ligne dans le DataGrid
         private void DataGrid_MouseDoubleClick(object sender, MouseButtonEventArgs e)
         {
             var dataGrid = sender as DataGrid;
-            var studentToUpdate = dataGrid?.SelectedItem as Student;  // Get the student object from the DataGrid selection
+            // Get the student object from the DataGrid selection
 
-            if (studentToUpdate != null)
+            if (dataGrid?.SelectedItem is Student studentToUpdate)
             {
                 // Now you can call the method to update the student
                 UpdateStudentInDatabase(studentToUpdate);
@@ -268,35 +251,31 @@ namespace StudentManager.Views.Pages
             }
         }
 
-
-        // Fonction pour mettre à jour l'étudiant dans la base de données
-        private void UpdateStudentInDatabase(Student student)
+        private static void UpdateStudentInDatabase(Student student)
         {
             try
             {
-                using (var connection = DBConnection.GetConnection())
-                {
-                    connection.Open();
+                using var connection = DBConnection.GetConnection();
+                connection?.Open();
 
-                    // SQL query to update the student record
-                    var query = @"UPDATE students 
-                          SET FirstName = @FirstName, LastName = @LastName, 
+                // SQL query to update the student record
+                var query = @"UPDATE students 
+                              SET FirstName = @FirstName, LastName = @LastName, 
                               Email = @Email, MajorId = @MajorId, DateOfBirth = @DateOfBirth
-                          WHERE Id = @Id";
+                              WHERE Id = @Id";
 
-                    using (var command = new MySqlCommand(query, connection))
-                    {
-                        // Add parameters to the query
-                        command.Parameters.AddWithValue("@Id", student.Id);
-                        command.Parameters.AddWithValue("@FirstName", student.FirstName);
-                        command.Parameters.AddWithValue("@LastName", student.LastName);
-                        command.Parameters.AddWithValue("@Email", student.Email);
-                        command.Parameters.AddWithValue("@MajorId", student.Major.Id);
-                        command.Parameters.AddWithValue("@DateOfBirth", student.DateOfBirth);
+                using (var command = new MySqlCommand(query, connection))
+                {
+                    // Add parameters to the query
+                    command.Parameters.AddWithValue("@Id", student.Id);
+                    command.Parameters.AddWithValue("@FirstName", student.FirstName);
+                    command.Parameters.AddWithValue("@LastName", student.LastName);
+                    command.Parameters.AddWithValue("@Email", student.Email);
+                    command.Parameters.AddWithValue("@MajorId", student.Major?.Id);
+                    command.Parameters.AddWithValue("@DateOfBirth", student.DateOfBirth);
 
-                        // Execute the update
-                        command.ExecuteNonQuery();
-                    }
+                    // Execute the update
+                    command.ExecuteNonQuery();
                 }
             }
             catch (Exception ex)
@@ -309,64 +288,55 @@ namespace StudentManager.Views.Pages
         {
             var selectedMajor = MajorComboBoxSe.SelectedItem as Major;
 
-            // Si l'index sélectionné est 0 ou si "Tout" est sélectionné
+            // If "Tout" is selected, show all students, regardless of major
             if (MajorComboBoxSe.SelectedIndex == 0 || (selectedMajor != null && selectedMajor.Name == "Tout"))
             {
-               
-                FetchAllStudents(); // Appeler la méthode pour afficher tous les étudiants
+                // Call the method to fetch all students
+                FetchAllStudents();
                 return;
             }
 
-            // Cas où une autre filière est sélectionnée
+            // If a major is selected, filter the students by major
             if (selectedMajor != null)
             {
                 string searchMajorName = selectedMajor.Name;
-                MessageBox.Show($"Recherche pour la filière : {searchMajorName}");
-
+                //MessageBox.Show($"Recherche pour la filière : {searchMajorName}");
                 try
                 {
-                    using (var connection = DBConnection.GetConnection())
+                    using var connection = DBConnection.GetConnection();
+                    connection?.Open();
+                    var query = @"SELECT students.Id, students.FirstName, students.LastName, students.Email, 
+                                  students.MajorId, students.DateOfBirth, majors.Name as MajorName, majors.Description as MajorDescription
+                                  FROM students
+                                  LEFT JOIN majors ON students.MajorId = majors.Id
+                                  WHERE majors.Name = @MajorName"; // Filter by major name
+
+                    using var command = new MySqlCommand(query, connection);
+                    command.Parameters.AddWithValue("@MajorName", searchMajorName);
+
+                    using var reader = command.ExecuteReader();
+                    var studentsFil = new List<Student>();
+
+                    while (reader.Read())
                     {
-                        connection.Open();
-                        var query = @"SELECT students.Id, students.FirstName, students.LastName, students.Email, 
-                             students.MajorId, students.DateOfBirth, 
-                             majors.Name as MajorName, majors.Description as MajorDescription
-                      FROM students
-                      LEFT JOIN majors ON students.MajorId = majors.Id
-                      WHERE majors.Name = @MajorName"; // Filtrer par filière sélectionnée
-
-                        using (var command = new MySqlCommand(query, connection))
+                        studentsFil.Add(new Student
                         {
-                            // Ajout du filtre de la filière
-                            command.Parameters.AddWithValue("@MajorName", searchMajorName);
-
-                            using (var reader = command.ExecuteReader())
+                            Id = reader.GetInt32("Id"),
+                            FirstName = reader.GetString("FirstName"),
+                            LastName = reader.GetString("LastName"),
+                            Email = reader.GetString("Email"),
+                            Major = new Major
                             {
-                                var studentsFil = new List<Student>();
-
-                                while (reader.Read())
-                                {
-                                    studentsFil.Add(new Student
-                                    {
-                                        Id = reader.GetInt32("Id"),
-                                        FirstName = reader.GetString("FirstName"),
-                                        LastName = reader.GetString("LastName"),
-                                        Email = reader.GetString("Email"),
-                                        Major = new Major
-                                        {
-                                            Id = reader.GetInt32("MajorId"),
-                                            Name = reader.GetString("MajorName"),
-                                            Description = reader.GetString("MajorDescription")
-                                        },
-                                        DateOfBirth = reader.GetDateTime("DateOfBirth")
-                                    });
-                                }
-
-                                // Mise à jour de la source de données pour le DataGrid
-                                UIDataGrid.ItemsSource = studentsFil;
-                            }
-                        }
+                                Id = reader.GetInt32("MajorId"),
+                                Name = reader.GetString("MajorName"),
+                                Description = reader.GetString("MajorDescription")
+                            },
+                            DateOfBirth = reader.GetDateTime("DateOfBirth")
+                        });
                     }
+
+                    // Update the DataGrid's ItemsSource
+                    UIDataGrid.ItemsSource = studentsFil;
                 }
                 catch (Exception ex)
                 {
@@ -379,49 +349,41 @@ namespace StudentManager.Views.Pages
             }
         }
 
-        // Méthode pour récupérer tous les étudiants (inchangée)
         private void FetchAllStudents()
         {
             try
             {
-                using (var connection = DBConnection.GetConnection())
+                using var connection = DBConnection.GetConnection();
+                connection?.Open();
+                var query = @"SELECT students.Id, students.FirstName, students.LastName, students.Email, 
+                              students.MajorId, students.DateOfBirth, majors.Name as MajorName, majors.Description as MajorDescription
+                              FROM students
+                              LEFT JOIN majors ON students.MajorId = majors.Id"; // No filter
+
+                using var command = new MySqlCommand(query, connection);
+                using var reader = command.ExecuteReader();
+                var allStudents = new List<Student>();
+
+                while (reader.Read())
                 {
-                    connection.Open();
-                    var query = @"SELECT students.Id, students.FirstName, students.LastName, students.Email, 
-                         students.MajorId, students.DateOfBirth, 
-                         majors.Name as MajorName, majors.Description as MajorDescription
-                  FROM students
-                  LEFT JOIN majors ON students.MajorId = majors.Id"; // Pas de filtre ici
-
-                    using (var command = new MySqlCommand(query, connection))
+                    allStudents.Add(new Student
                     {
-                        using (var reader = command.ExecuteReader())
+                        Id = reader.GetInt32("Id"),
+                        FirstName = reader.GetString("FirstName"),
+                        LastName = reader.GetString("LastName"),
+                        Email = reader.GetString("Email"),
+                        Major = new Major
                         {
-                            var allStudents = new List<Student>();
-
-                            while (reader.Read())
-                            {
-                                allStudents.Add(new Student
-                                {
-                                    Id = reader.GetInt32("Id"),
-                                    FirstName = reader.GetString("FirstName"),
-                                    LastName = reader.GetString("LastName"),
-                                    Email = reader.GetString("Email"),
-                                    Major = new Major
-                                    {
-                                        Id = reader.GetInt32("MajorId"),
-                                        Name = reader.GetString("MajorName"),
-                                        Description = reader.GetString("MajorDescription")
-                                    },
-                                    DateOfBirth = reader.GetDateTime("DateOfBirth")
-                                });
-                            }
-
-                            // Mise à jour de la source de données pour le DataGrid
-                            UIDataGrid.ItemsSource = allStudents;
-                        }
-                    }
+                            Id = reader.GetInt32("MajorId"),
+                            Name = reader.GetString("MajorName"),
+                            Description = reader.GetString("MajorDescription")
+                        },
+                        DateOfBirth = reader.GetDateTime("DateOfBirth")
+                    });
                 }
+
+                // Update the DataGrid's ItemsSource
+                UIDataGrid.ItemsSource = allStudents;
             }
             catch (Exception ex)
             {
