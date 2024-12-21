@@ -1,11 +1,11 @@
 ﻿using StudentManager.ViewModels;
 using StudentManager.ViewModels.Pages;
 using MySql.Data.MySqlClient;
-using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using StudentManager.Models;
+using StudentManager.Views.Windows;
 
 namespace StudentManager.Views.Pages
 {
@@ -40,7 +40,7 @@ namespace StudentManager.Views.Pages
             }
         }
 
-        private void AddStudentToDatabase(Student student)
+        private static void AddStudentToDatabase(Student student)
         {
             try
             {
@@ -67,6 +67,13 @@ namespace StudentManager.Views.Pages
 
         private void DeleteButton_Click(object sender, RoutedEventArgs e)
         {
+            var result = MessageBox.Show("Voulez-vous vraiment supprimer l'étudiant sélectionné(s) ?",
+                "Confirmation de suppression", MessageBoxButton.YesNo, MessageBoxImage.Question);
+            if (result == MessageBoxResult.No)
+            {
+                return;
+            }
+
             var mainViewModel = (MainViewModel)DataContext;
             var selectedStudents = mainViewModel.StudentsViewModel.Students.Where(s => s.IsSelected).ToList();
             foreach (var student in selectedStudents)
@@ -84,7 +91,7 @@ namespace StudentManager.Views.Pages
             }
         }
 
-        private void DeleteStudentFromDatabase(Student student)
+        private static void DeleteStudentFromDatabase(Student student)
         {
             try
             {
@@ -126,6 +133,8 @@ namespace StudentManager.Views.Pages
             {
                 mainViewModel.StudentsViewModel.Students[i].IsSelected = true;
             }
+            // Raise the PropertyChanged event for SelectedStudents
+            mainViewModel.StudentsViewModel.RaisePropertyChanged(nameof(StudentsViewModel.SelectedStudents));
         }
 
         private void SelectAllCheckBox_Unchecked(object sender, RoutedEventArgs e)
@@ -135,6 +144,8 @@ namespace StudentManager.Views.Pages
             {
                 mainViewModel.StudentsViewModel.Students[i].IsSelected = false;
             }
+            // Raise the PropertyChanged event for SelectedStudents
+            mainViewModel.StudentsViewModel.RaisePropertyChanged(nameof(StudentsViewModel.SelectedStudents));
         }
 
         private void DataGrid_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
@@ -159,7 +170,6 @@ namespace StudentManager.Views.Pages
                         }
                     }
                     _lastSelectedIndex = currentIndex;
-
                     
                     e.Handled = true;
                 }
@@ -190,185 +200,31 @@ namespace StudentManager.Views.Pages
 
         private void SearchTextBox_TextChanged(object sender, TextChangedEventArgs e)
         {
-            if (SearchTextBox != null)
-            {
-                var filter = SearchTextBox.Text;
+            var mainViewModel = (MainViewModel)DataContext;
+            //var filter = SearchTextBox.Text;
+            var filter = '%' + SearchTextBox.Text + '%';
 
-                try
-                {
-                    using var connection = DBConnection.GetConnection();
-                    connection?.Open();
-                    var query = @"SELECT students.Id, students.FirstName, students.LastName, students.Email, 
-                                  students.MajorId, students.DateOfBirth, majors.Name as MajorName, majors.Description as MajorDescription
-                                  FROM students
-                                  LEFT JOIN majors ON students.MajorId = majors.Id
-                                  WHERE CAST(students.Id AS CHAR) LIKE @filter 
-                                  OR students.FirstName LIKE @filter 
-                                  OR students.LastName LIKE @filter";
-
-                    using var command = new MySqlCommand(query, connection);
-                    command.Parameters.AddWithValue("@filter", $"{filter}");
-
-                    using var reader = command.ExecuteReader();
-                    var students = new List<Student>();
-
-                    while (reader.Read())
-                    {
-                        students.Add(new Student
-                        {
-                            Id = reader.GetInt32("Id"),
-                            FirstName = reader.GetString("FirstName"),
-                            LastName = reader.GetString("LastName"),
-                            Email = reader.GetString("Email"),
-                            Major = new Major
-                            {
-                                Id = reader.GetInt32("MajorId"),
-                                Name = reader.GetString("MajorName"),
-                                Description = reader.GetString("MajorDescription")
-                            },
-                            DateOfBirth = reader.GetDateTime("DateOfBirth")
-                        });
-                    }
-
-                    // Update the DataGrid's ItemsSource
-                    UIDataGrid.ItemsSource = students;
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show($"Erreur lors de la recherche : {ex.Message}");
-                }
-            }
-        }
-
-        private void DataGrid_MouseDoubleClick(object sender, MouseButtonEventArgs e)
-        {
-            var dataGrid = sender as DataGrid;
-            // Get the student object from the DataGrid selection
-
-            if (dataGrid?.SelectedItem is Student studentToUpdate)
-            {
-                // Now you can call the method to update the student
-                UpdateStudentInDatabase(studentToUpdate);
-                MessageBox.Show($"Student {studentToUpdate.FirstName} {studentToUpdate.LastName} has been updated.");
-            }
-        }
-
-        private static void UpdateStudentInDatabase(Student student)
-        {
-            try
-            {
-                using var connection = DBConnection.GetConnection();
-                connection?.Open();
-
-                // SQL query to update the student record
-                var query = @"UPDATE students 
-                              SET FirstName = @FirstName, LastName = @LastName, 
-                              Email = @Email, MajorId = @MajorId, DateOfBirth = @DateOfBirth
-                              WHERE Id = @Id";
-
-                using (var command = new MySqlCommand(query, connection))
-                {
-                    // Add parameters to the query
-                    command.Parameters.AddWithValue("@Id", student.Id);
-                    command.Parameters.AddWithValue("@FirstName", student.FirstName);
-                    command.Parameters.AddWithValue("@LastName", student.LastName);
-                    command.Parameters.AddWithValue("@Email", student.Email);
-                    command.Parameters.AddWithValue("@MajorId", student.Major?.Id);
-                    command.Parameters.AddWithValue("@DateOfBirth", student.DateOfBirth);
-
-                    // Execute the update
-                    command.ExecuteNonQuery();
-                }
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Error while updating student: {ex.Message}");
-            }
-        }
-
-        private void MajorComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            var selectedMajor = MajorComboBoxSe.SelectedItem as Major;
-
-            // If "Tout" is selected, show all students, regardless of major
-            if (MajorComboBoxSe.SelectedIndex == 0 || (selectedMajor != null && selectedMajor.Name == "Tout"))
-            {
-                // Call the method to fetch all students
-                FetchAllStudents();
-                return;
-            }
-
-            // If a major is selected, filter the students by major
-            if (selectedMajor != null)
-            {
-                string searchMajorName = selectedMajor.Name;
-                //MessageBox.Show($"Recherche pour la filière : {searchMajorName}");
-                try
-                {
-                    using var connection = DBConnection.GetConnection();
-                    connection?.Open();
-                    var query = @"SELECT students.Id, students.FirstName, students.LastName, students.Email, 
-                                  students.MajorId, students.DateOfBirth, majors.Name as MajorName, majors.Description as MajorDescription
-                                  FROM students
-                                  LEFT JOIN majors ON students.MajorId = majors.Id
-                                  WHERE majors.Name = @MajorName"; // Filter by major name
-
-                    using var command = new MySqlCommand(query, connection);
-                    command.Parameters.AddWithValue("@MajorName", searchMajorName);
-
-                    using var reader = command.ExecuteReader();
-                    var studentsFil = new List<Student>();
-
-                    while (reader.Read())
-                    {
-                        studentsFil.Add(new Student
-                        {
-                            Id = reader.GetInt32("Id"),
-                            FirstName = reader.GetString("FirstName"),
-                            LastName = reader.GetString("LastName"),
-                            Email = reader.GetString("Email"),
-                            Major = new Major
-                            {
-                                Id = reader.GetInt32("MajorId"),
-                                Name = reader.GetString("MajorName"),
-                                Description = reader.GetString("MajorDescription")
-                            },
-                            DateOfBirth = reader.GetDateTime("DateOfBirth")
-                        });
-                    }
-
-                    // Update the DataGrid's ItemsSource
-                    UIDataGrid.ItemsSource = studentsFil;
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show($"Erreur lors de la recherche : {ex.Message}");
-                }
-            }
-            else
-            {
-                MessageBox.Show("Aucune filière sélectionnée.");
-            }
-        }
-
-        private void FetchAllStudents()
-        {
             try
             {
                 using var connection = DBConnection.GetConnection();
                 connection?.Open();
                 var query = @"SELECT students.Id, students.FirstName, students.LastName, students.Email, 
-                              students.MajorId, students.DateOfBirth, majors.Name as MajorName, majors.Description as MajorDescription
-                              FROM students
-                              LEFT JOIN majors ON students.MajorId = majors.Id"; // No filter
+                              students.MajorId, students.DateOfBirth, majors.Name as MajorName, majors.Description as MajorDescription 
+                              FROM students 
+                              LEFT JOIN majors ON students.MajorId = majors.Id 
+                              WHERE CAST(students.Id AS CHAR) LIKE @filter 
+                              OR students.FirstName LIKE @filter 
+                              OR students.LastName LIKE @filter";
 
                 using var command = new MySqlCommand(query, connection);
+                command.Parameters.AddWithValue("@filter", $"{filter}");
+
                 using var reader = command.ExecuteReader();
-                var allStudents = new List<Student>();
+                var students = new List<Student>();
 
                 while (reader.Read())
                 {
-                    allStudents.Add(new Student
+                    students.Add(new Student
                     {
                         Id = reader.GetInt32("Id"),
                         FirstName = reader.GetString("FirstName"),
@@ -385,13 +241,91 @@ namespace StudentManager.Views.Pages
                 }
 
                 // Update the DataGrid's ItemsSource
-                UIDataGrid.ItemsSource = allStudents;
+                //UIDataGrid.ItemsSource = students;
+                // Clear and update the Students collection instead of replacing the ItemsSource
+                mainViewModel.StudentsViewModel.Students.Clear();
+                foreach (var student in students)
+                {
+                    mainViewModel.StudentsViewModel.Students.Add(student);
+                }
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Erreur lors de la récupération des étudiants : {ex.Message}");
+                MessageBox.Show($"Erreur lors de la recherche : {ex.Message}");
             }
         }
 
+        private void MajorComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            var mainViewModel = (MainViewModel)DataContext;
+            var selectedMajor = MajorComboBoxSe.SelectedItem as Major;
+
+            try
+            {
+                using var connection = DBConnection.GetConnection();
+                connection?.Open();
+                string query;
+                MySqlCommand command;
+
+                // If "Tout" is selected, show all students, regardless of major
+                if (MajorComboBoxSe.SelectedIndex == 0 || (selectedMajor != null && selectedMajor.Name == "Tout"))
+                {
+                    query = @"SELECT students.Id, students.FirstName, students.LastName, students.Email, 
+                              students.MajorId, students.DateOfBirth, majors.Name as MajorName, majors.Description as MajorDescription 
+                              FROM students 
+                              LEFT JOIN majors ON students.MajorId = majors.Id"; // No filter
+                    command = new MySqlCommand(query, connection);
+                }
+                // If a major is selected, filter the students by major
+                else
+                {
+                    query = @"SELECT students.Id, students.FirstName, students.LastName, students.Email, 
+                              students.MajorId, students.DateOfBirth, majors.Name as MajorName, majors.Description as MajorDescription 
+                              FROM students 
+                              LEFT JOIN majors ON students.MajorId = majors.Id 
+                              WHERE majors.Name = @MajorName"; // Filter by major name
+                    command = new MySqlCommand(query, connection);
+                    command.Parameters.AddWithValue("@MajorName", selectedMajor.Name);
+                }
+
+                using var reader = command.ExecuteReader();
+                var students = new List<Student>();
+
+                while (reader.Read())
+                {
+                    students.Add(new Student
+                    {
+                        Id = reader.GetInt32("Id"),
+                        FirstName = reader.GetString("FirstName"),
+                        LastName = reader.GetString("LastName"),
+                        Email = reader.GetString("Email"),
+                        Major = new Major
+                        {
+                            Id = reader.GetInt32("MajorId"),
+                            Name = reader.GetString("MajorName"),
+                            Description = reader.GetString("MajorDescription")
+                        },
+                        DateOfBirth = reader.GetDateTime("DateOfBirth")
+                    });
+                }
+
+                // Update the DataGrid's ItemsSource
+                mainViewModel.StudentsViewModel.Students.Clear();
+                foreach (var student in students)
+                {
+                    mainViewModel.StudentsViewModel.Students.Add(student);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Erreur lors de la recherche : {ex.Message}");
+            }
+        }
+
+        private void ViewUsageInfoButton_Click(object sender, RoutedEventArgs e)
+        {
+            var dialog = new StudentsUsageInfoDialog();
+            dialog.ShowDialog();
+        }
     }
 }

@@ -2,12 +2,9 @@
 using GalaSoft.MvvmLight.Command;
 using MySql.Data.MySqlClient;
 using StudentManager.Models;
-using System;
-using System.Collections.Generic;
+using StudentManager.Views.Windows;
 using System.Collections.ObjectModel;
 using System.Data;
-using System.Linq;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
 
@@ -16,10 +13,8 @@ namespace StudentManager.ViewModels.Pages
     public class StudentsViewModel : ViewModelBase
     {
         public ObservableCollection<Student> Students { get; }
-        public ObservableCollection<Student> SelectedStudents => new(Students.Where(s => s.IsSelected));
         public ObservableCollection<Major> MajorsWithAll { get; set; }
-
-        public ICommand ViewUsageInfoCommand { get; }
+        public ObservableCollection<Student> SelectedStudents => new(Students.Where(s => s.IsSelected));
 
         public StudentsViewModel(MajorsViewModel majorsViewModel)
         {
@@ -31,12 +26,6 @@ namespace StudentManager.ViewModels.Pages
             Students = [];
             _ = LoadStudentsAsync(); // Load students asynchronously
             _ = LoadMajorsAsync(); // Load majors asynchronously
-
-            // Subscribe to the CollectionChanged event to update the SelectedStudents property
-            Students.CollectionChanged += (s, e) => RaisePropertyChanged(nameof(SelectedStudents));
-
-            // Command to view usage info
-            ViewUsageInfoCommand = new RelayCommand(ViewUsageInfo);
         }
 
         private async Task LoadStudentsAsync()
@@ -78,11 +67,6 @@ namespace StudentManager.ViewModels.Pages
             }
         }
 
-        private void ViewUsageInfo()
-        {
-            MessageBox.Show("This is a message box");
-        }
-
         private async Task LoadMajorsAsync()
         {
             try
@@ -108,7 +92,7 @@ namespace StudentManager.ViewModels.Pages
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Erreur lors du chargement des fiil: {ex.Message}");
+                MessageBox.Show($"Erreur lors du chargement des majeures: {ex.Message}");
             }
         }
     }

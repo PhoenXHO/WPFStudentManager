@@ -1,4 +1,6 @@
-﻿using System.ComponentModel;
+﻿using MySql.Data.MySqlClient;
+using System.ComponentModel;
+using System.Windows;
 
 namespace StudentManager.Models
 {
@@ -23,7 +25,8 @@ namespace StudentManager.Models
 				{
 					_id = value;
 					OnPropertyChanged(nameof(Id));
-				}
+                    UpdateDatabase("Id", value);
+                }
 			}
 		}
         public required string? FirstName
@@ -35,7 +38,8 @@ namespace StudentManager.Models
 				{
 					_firstName = value;
 					OnPropertyChanged(nameof(FirstName));
-				}
+                    UpdateDatabase("FirstName", value);
+                }
 			}
 		}
 		public required string? LastName
@@ -47,7 +51,8 @@ namespace StudentManager.Models
 				{
 					_lastName = value;
 					OnPropertyChanged(nameof(LastName));
-				}
+                    UpdateDatabase("LastName", value);
+                }
 			}
 		}
 		public required string? Email
@@ -59,7 +64,8 @@ namespace StudentManager.Models
 				{
 					_email = value;
 					OnPropertyChanged(nameof(Email));
-				}
+                    UpdateDatabase("Email", value);
+                }
 			}
 		}
 		public required Major? Major
@@ -71,7 +77,8 @@ namespace StudentManager.Models
 				{
 					_major = value;
 					OnPropertyChanged(nameof(Major));
-				}
+                    UpdateDatabase("MajorId", value?.Id);
+                }
 			}
 		}
 		public DateTime? DateOfBirth
@@ -83,7 +90,8 @@ namespace StudentManager.Models
 				{
 					_dateOfBirth = value;
 					OnPropertyChanged(nameof(DateOfBirth));
-				}
+                    UpdateDatabase("DateOfBirth", value);
+                }
 			}
 		}
         public bool IsSelected
@@ -105,5 +113,26 @@ namespace StudentManager.Models
 		{
 			PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
 		}
-	}
+
+		private void UpdateDatabase(string propertyName, object value)
+        {
+            try
+            {
+                using var connection = DBConnection.GetConnection();
+                connection?.Open();
+
+                var query = $"UPDATE students SET {propertyName} = @Value WHERE Id = @Id";
+                using var command = new MySqlCommand(query, connection);
+
+                command.Parameters.AddWithValue("@Value", value);
+                command.Parameters.AddWithValue("@Id", Id);
+
+                command.ExecuteNonQuery();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Erreur lors de la mise à jour de l'étudiant: {ex.Message}");
+            }
+        }
+    }
 }

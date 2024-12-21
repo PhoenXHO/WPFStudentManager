@@ -1,15 +1,10 @@
-﻿using Microsoft.OData.Client;
-using MySql.Data.MySqlClient;
-using SharpDX.Direct3D9;
+﻿using MySql.Data.MySqlClient;
 using StudentManager.Models;
 using StudentManager.ViewModels;
 using StudentManager.ViewModels.Pages;
-using System.Collections.ObjectModel;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Input;
-using static System.Net.Mime.MediaTypeNames;
-using Telerik.Windows.Documents.Spreadsheet.Expressions.Functions;
+using StudentManager.Views.Windows;
 
 namespace StudentManager.Views.Pages
 {
@@ -19,8 +14,6 @@ namespace StudentManager.Views.Pages
     public partial class MajorsPage : Page
     {
         public MajorsViewModel ViewModel { get; set; }
-        private bool _isShiftPressed;
-        private int _lastSelectedIndex = -1;
 
         public MajorsPage()
         {
@@ -43,7 +36,7 @@ namespace StudentManager.Views.Pages
                 mainViewModel.MajorsViewModel.Majors.Add(major);
             }
         }
-        private void AddMajorToDatabase(Major major)
+        private static void AddMajorToDatabase(Major major)
         {
             try
             {
@@ -69,6 +62,16 @@ namespace StudentManager.Views.Pages
 
         private void DeleteButton_Click(object sender, RoutedEventArgs e)
         {
+            // Prompt the user to confirm the deletion (in French)
+            var result = MessageBox.Show("Voulez-vous vraiment supprimer les filières sélectionnées ? " +
+                "Vous allez perdre toutes les données des étudiants associés. " +
+                "(Cette action est irréversible)",
+                "Confirmation de suppression", MessageBoxButton.YesNo, MessageBoxImage.Warning);
+            if (result == MessageBoxResult.No)
+            {
+                return;
+            }
+
             var mainViewModel = (MainViewModel)DataContext;
             var selectedMajors = mainViewModel.MajorsViewModel.Majors.Where(m => m.IsSelected).ToList();
             foreach (var major in selectedMajors)
@@ -109,28 +112,11 @@ namespace StudentManager.Views.Pages
             ((MainViewModel)DataContext).MajorsViewModel.RaisePropertyChanged(nameof(MajorsViewModel.SelectedMajors));
         }
 
-        //private void SelectAllCheckBox_Checked(object sender, RoutedEventArgs e)
-        //{
-        //    var mainViewModel = (MainViewModel)DataContext;
-        //    foreach (var major in mainViewModel.MajorsViewModel.Majors)
-        //    {
-        //        major.IsSelected = true;
-        //    }
-        //}
-
-        //private void SelectAllCheckBox_Unchecked(object sender, RoutedEventArgs e)
-        //{
-        //    var mainViewModel = (MainViewModel)DataContext;
-        //    foreach (var major in mainViewModel.MajorsViewModel.Majors)
-        //    {
-        //        major.IsSelected = false;
-        //    }
-        //}
-
-        private void UpdateDeleteButtonState()
+        private void ViewDetailsButton_Click(object sender, RoutedEventArgs e)
         {
-            var mainViewModel = (MainViewModel)DataContext;
-            DeleteButton.IsEnabled = mainViewModel.MajorsViewModel.Majors.Any(m => m.IsSelected);
+            var major = (Major)((Button)sender).DataContext;
+            var mainViewModel = (MainWindow)Window.GetWindow(this);
+            mainViewModel.RootNavigation.Navigate(typeof(MajorDetailsPage), major);
         }
 
         private void InfoButton_Click(object sender, RoutedEventArgs e)
@@ -139,11 +125,10 @@ namespace StudentManager.Views.Pages
             MessageBox.Show($"Viewing details for {major.Name}");
         }
 
-		private void ViewDetailsButton_Click(object sender, RoutedEventArgs e)
+        private void ViewUsageInfoButton_Click(object sender, RoutedEventArgs e)
         {
-            var major = (Major)((Button)sender).DataContext;
-            var mainViewModel = (MainWindow)Window.GetWindow(this);
-            mainViewModel.RootNavigation.Navigate(typeof(MajorDetailsPage), major);
+            var dialog = new MajorsUsageInfoDialog();
+            dialog.ShowDialog();
         }
     }
 }

@@ -2,7 +2,7 @@
 
 namespace StudentManager.Models
 {
-    public class Major
+    public class Major : INotifyPropertyChanged
     {
         public event PropertyChangedEventHandler? PropertyChanged;
 
