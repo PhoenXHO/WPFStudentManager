@@ -27,6 +27,7 @@ namespace StudentManager.Views.Dialogs
             // Set text box values
             NameTextBox.Text = major.Name;
             DescriptionTextBox.Text = major.Description;
+            ResponsableTextBox.Text = major.Responsable;
         }
 
         private void SaveButton_Click(object sender, RoutedEventArgs e)
@@ -37,6 +38,7 @@ namespace StudentManager.Views.Dialogs
             // Update major properties
             major.Name = NameTextBox.Text;
             major.Description = DescriptionTextBox.Text;
+            major.Responsable = ResponsableTextBox.Text;
 
             // Set dialog result to true
             DialogResult = true;

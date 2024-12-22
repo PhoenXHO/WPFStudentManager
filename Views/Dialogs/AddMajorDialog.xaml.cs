@@ -33,7 +33,8 @@ namespace StudentManager.Views.Dialogs
             NewMajor = new Major
             {
                 Name = NameTextBox.Text,
-                Description = DescriptionTextBox.Text
+                Description = DescriptionTextBox.Text,
+                Responsable = ResponsableTextBox.Text
             };
             DialogResult = true;
         }

@@ -209,7 +209,7 @@ namespace StudentManager.Views.Pages
                 using var connection = DBConnection.GetConnection();
                 connection?.Open();
                 var query = @"SELECT students.Id, students.FirstName, students.LastName, students.Email, 
-                              students.MajorId, students.DateOfBirth, majors.Name as MajorName, majors.Description as MajorDescription 
+                              students.MajorId, students.DateOfBirth, majors.Name as MajorName, majors.Description as MajorDescription , majors.Responsable as Responsable
                               FROM students 
                               LEFT JOIN majors ON students.MajorId = majors.Id 
                               WHERE CAST(students.Id AS CHAR) LIKE @filter 
@@ -234,7 +234,8 @@ namespace StudentManager.Views.Pages
                         {
                             Id = reader.GetInt32("MajorId"),
                             Name = reader.GetString("MajorName"),
-                            Description = reader.GetString("MajorDescription")
+                            Description = reader.GetString("MajorDescription"),
+                            Responsable = reader.GetString("Responsable")
                         },
                         DateOfBirth = reader.GetDateTime("DateOfBirth")
                     });
@@ -271,7 +272,7 @@ namespace StudentManager.Views.Pages
                 if (MajorComboBoxSe.SelectedIndex == 0 || (selectedMajor != null && selectedMajor.Name == "Tout"))
                 {
                     query = @"SELECT students.Id, students.FirstName, students.LastName, students.Email, 
-                              students.MajorId, students.DateOfBirth, majors.Name as MajorName, majors.Description as MajorDescription 
+                              students.MajorId, students.DateOfBirth, majors.Name as MajorName, majors.Description as MajorDescription , majors.Responsable as Responsable
                               FROM students 
                               LEFT JOIN majors ON students.MajorId = majors.Id"; // No filter
                     command = new MySqlCommand(query, connection);
@@ -280,7 +281,7 @@ namespace StudentManager.Views.Pages
                 else
                 {
                     query = @"SELECT students.Id, students.FirstName, students.LastName, students.Email, 
-                              students.MajorId, students.DateOfBirth, majors.Name as MajorName, majors.Description as MajorDescription 
+                              students.MajorId, students.DateOfBirth, majors.Name as MajorName, majors.Description as MajorDescription , majors.Responsable as Responsable
                               FROM students 
                               LEFT JOIN majors ON students.MajorId = majors.Id 
                               WHERE majors.Name = @MajorName"; // Filter by major name
@@ -303,8 +304,10 @@ namespace StudentManager.Views.Pages
                         {
                             Id = reader.GetInt32("MajorId"),
                             Name = reader.GetString("MajorName"),
-                            Description = reader.GetString("MajorDescription")
-                        },
+                            Description = reader.GetString("MajorDescription"),
+                            Responsable = reader.GetString("Responsable") 
+                        }
+,
                         DateOfBirth = reader.GetDateTime("DateOfBirth")
                     });
                 }

@@ -20,7 +20,7 @@ namespace StudentManager.ViewModels.Pages
         {
             // Create a new ObservableCollection with the 'All' item at the beginning
             MajorsWithAll = new ObservableCollection<Major>(majorsViewModel.Majors);
-            MajorsWithAll.Insert(0, new Major { Id = 0, Name = "Tout", Description = "All Majors" });
+            MajorsWithAll.Insert(0, new Major { Id = 0, Name = "Tout", Description = "All Majors",Responsable="All"});
 
             // Initialisation de la liste des étudiants
             Students = [];
@@ -35,7 +35,7 @@ namespace StudentManager.ViewModels.Pages
                 using var connection = DBConnection.GetConnection();
                 await connection.OpenAsync();
 
-                string query = @"SELECT students.Id, students.FirstName, students.LastName, students.Email, students.MajorId, students.DateOfBirth, majors.Name as MajorName, majors.Description as MajorDescription
+                string query = @"SELECT students.Id, students.FirstName, students.LastName, students.Email, students.MajorId, students.DateOfBirth, majors.Name as MajorName, majors.Description as MajorDescription,  majors.Responsable as Responsable 
                                  FROM students LEFT JOIN majors ON students.MajorId = majors.Id";
 
                 using var command = new MySqlCommand(query, connection);
@@ -54,7 +54,8 @@ namespace StudentManager.ViewModels.Pages
                         {
                             Id = reader.GetInt32("MajorId"),
                             Name = reader.GetString("MajorName"),
-                            Description = reader.GetString("MajorDescription")
+                            Description = reader.GetString("MajorDescription"),
+                            Responsable = reader.GetString("Responsable")
                         }
                     };
 
@@ -74,7 +75,7 @@ namespace StudentManager.ViewModels.Pages
                 using var connection = DBConnection.GetConnection();
                 await connection.OpenAsync();
 
-                string query = "SELECT majors.Id,  majors.Name,  majors.Description FROM majors";
+                string query = "SELECT majors.Id,  majors.Name,  majors.Description, majors.Responsable FROM majors";
 
                 using var command = new MySqlCommand(query, connection);
                 using var reader = await command.ExecuteReaderAsync();
@@ -84,7 +85,9 @@ namespace StudentManager.ViewModels.Pages
                     {
                         Id = reader.GetInt32("Id"),
                         Name = reader.GetString("Name"),
-                        Description = reader.GetString("Description")
+                        Description = reader.GetString("Description"),
+                        Responsable = reader.GetString("Responsable")
+
                     };
 
                     MajorsWithAll.Add(major);

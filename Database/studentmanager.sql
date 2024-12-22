@@ -8,6 +8,11 @@ CREATE TABLE users (
 
 INSERT INTO users (username, password) VALUES ('admin', 'admin');
 
+
+ALTER TABLE Majors
+ADD COLUMN responsable VARCHAR(255);
+
+
 CREATE TABLE Majors (
     Id INT AUTO_INCREMENT PRIMARY KEY,
     Name VARCHAR(255) NOT NULL,
@@ -20,6 +25,29 @@ VALUES ('Computer Science', 'The study of computers and computational systems'),
 	   ('Physics', 'The study of matter, energy, and the fundamental forces of nature'),
 	   ('Biology', 'The study of living organisms and their interactions with each other and their environments'),
 	   ('Chemistry', 'The study of the composition, structure, properties, and reactions of matter');
+
+
+
+UPDATE Majors
+SET responsable = 'John Doe'
+WHERE Name = 'Computer Science';
+
+UPDATE Majors
+SET responsable = 'Jane Smith'
+WHERE Name = 'Mathematics';
+
+UPDATE Majors
+SET responsable = 'Albert Einstein'
+WHERE Name = 'Physics';
+
+UPDATE Majors
+SET responsable = 'Charles Darwin'
+WHERE Name = 'Biology';
+
+UPDATE Majors
+SET responsable = 'Marie Curie'
+WHERE Name = 'Chemistry';
+
 
 CREATE TABLE Students (
     Id INT AUTO_INCREMENT PRIMARY KEY,
