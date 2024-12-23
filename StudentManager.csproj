@@ -38,7 +38,7 @@
 	  <Resource Include="Resources\Images\gestion.png" />
 	  <Resource Include="Resources\Images\upgrade1.png" />
   </ItemGroup>
-
+	
   <ItemGroup>
     <Page Include="App.xaml" />
   </ItemGroup>
@@ -47,10 +47,6 @@
     <None Update="appsettings.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Resources\Themes\" />
   </ItemGroup>
 
 </Project>
