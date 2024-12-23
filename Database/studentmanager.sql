@@ -5,6 +5,9 @@ CREATE TABLE users (
 	password VARCHAR(255) NOT NULL,
 	created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+ALTER TABLE users
+ADD COLUMN email VARCHAR(255) NOT NULL;
+
 
 INSERT INTO users (username, password) VALUES ('admin', 'admin');
 
