@@ -10,13 +10,8 @@ namespace StudentManager
     /// </summary>
     public partial class App : Application
     {
-        public static IConfiguration? Configuration { get; private set; }
-
         public App()
         {
-            Configuration = new ConfigurationBuilder()
-                .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
-                .Build();
         }
     }
 

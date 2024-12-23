@@ -1,93 +1,73 @@
-﻿<Page x:Class="StudentManager.Views.Pages.SettingsPage"
+﻿<Page x:Class="StudentManager.Views.Pages.SettingsPage" 
       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-      xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-      xmlns:local="clr-namespace:StudentManager.Views.Pages"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+      xmlns:local="clr-namespace:StudentManager.Views.Pages" 
       xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
-      mc:Ignorable="d"
-      d:DesignHeight="450" d:DesignWidth="1280"
-      Title="SettingsPage">
+      mc:Ignorable="d" d:DesignWidth="800"
+      Title="SettingsPage" Height="475" >
 
-    <Grid Margin="20">
+    <Grid Margin="10">
         <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
         <Grid Grid.Row="1" Margin="0,10,0,20">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="2*"/>
-                <ColumnDefinition Width="6*"/>
-                <ColumnDefinition Width="2*"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
 
-            <StackPanel Grid.Column="0" />
+            <StackPanel Grid.Column="1" Orientation="Vertical" HorizontalAlignment="Center">
+                <Ellipse Width="100" Height="100" Stroke="white" StrokeThickness="2">
+                    <Ellipse.Fill>
+                        <ImageBrush ImageSource="pack://application:,,,/Resources/Images/admin.jpeg"/>
+                    </Ellipse.Fill>
+                </Ellipse>
 
-            <Grid Grid.Column="1" VerticalAlignment="Top" HorizontalAlignment="Stretch">
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="*"/>
-                </Grid.RowDefinitions>
+                <Button Content="Change Profile" VerticalAlignment="Top" HorizontalAlignment="Center" Width="120" Margin="0,10,0,0"/>
+            </StackPanel>
 
-                <!-- User Profile Section -->
-                <Grid Grid.Row="0" Margin="-155,0,-176,20">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto"/>
-                        <ColumnDefinition Width="Auto"/>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="Auto"/>
-                        <ColumnDefinition Width="Auto"/>
-                    </Grid.ColumnDefinitions>
+            <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center" Margin="160,-10,-160,10">
+                <TextBlock Text="Dark Mode" VerticalAlignment="Center" Margin="0,0,10,0" FontSize="16" Foreground="white"/>
+                <ui:ToggleSwitch x:Name="ThemeSwitch" HorizontalAlignment="left" VerticalAlignment="Center" />
+            </StackPanel>
+        </Grid>
 
-                    <!--
-                    <Ellipse Grid.Column="0" Width="100" Height="100" Stroke="White" StrokeThickness="2" Margin="0,0,10,0">
-                        <Ellipse.Fill>
-                             <ImageBrush ImageSource="pack://application:,,,/Resources/Images/admin.jpeg"/> 
-                        </Ellipse.Fill>
-                    </Ellipse>
+        <Grid Grid.Row="2" VerticalAlignment="Top" HorizontalAlignment="Center" Margin="0">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
 
-                    <Button Grid.Column="1" Content="Change Profile" VerticalAlignment="Center" Width="150" HorizontalAlignment="Left"/>
-                    -->
-                    <TextBlock Grid.Column="2"/>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
 
-                    <TextBlock Grid.Column="3" Text="Light Mode" FontSize="16" Margin="0,0,10,0" VerticalAlignment="Center" Foreground="White"/>
+            </Grid.ColumnDefinitions>
 
-                    <ui:ToggleSwitch Grid.Column="4" x:Name="ThemeSwitch" VerticalAlignment="Center" 
-                                     IsChecked="{Binding IsDarkModeEnabled, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
-                </Grid>
+            <TextBlock Grid.Row="0" Grid.Column="0" Text="First Name:" FontSize="16" Width="120" Foreground="white"/>
+            <TextBox Grid.Row="0" Grid.Column="1"  Width="200" Text=""/>
 
-                <!-- User Settings Section -->
-                <Grid Grid.Row="1" VerticalAlignment="Top" MaxWidth="600" Margin="0,14,0,0">
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
-                    </Grid.RowDefinitions>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto"/>
-                        <ColumnDefinition Width="*"/>
-                    </Grid.ColumnDefinitions>
+            <TextBlock Grid.Row="1" Grid.Column="0" Text="Last Name:" FontSize="16" Width="120" Foreground="white"/>
+            <TextBox Grid.Row="1" Grid.Column="1" Width="200" Text=""/>
 
-                    <TextBlock Grid.Row="0" Grid.Column="0" Text="Username:" FontSize="16" Margin="0,0,10,0" VerticalAlignment="Center" Foreground="White"/>
-                    <TextBox x:Name="usernameTextBox" Grid.Row="0" Grid.Column="1" Width="300" Margin="0,5" Text="{Binding Username, Mode=TwoWay}"/>
+            <TextBlock Grid.Row="2" Grid.Column="0" Text="Email:"  FontSize="16" Width="120" Foreground="white"/>
+            <TextBox Grid.Row="2" Grid.Column="1" Width="200" Text=""/>
 
-                    <TextBlock Grid.Row="1" Grid.Column="0" Text="Email:" FontSize="16" Margin="0,0,10,0" VerticalAlignment="Center" Foreground="White"/>
-                    <TextBox x:Name="emailTextBox" Grid.Row="1" Grid.Column="1" Width="300" Margin="0,5" Text="{Binding Email, Mode=TwoWay}"/>
+            <TextBlock Grid.Row="3" Grid.Column="0" Text="Password:" FontSize="16" Width="120" Foreground="white"/>
+            <PasswordBox Grid.Row="3" Grid.Column="1" Width="200"/>
 
-                    <TextBlock Grid.Row="2" Grid.Column="0" Text="Password:" FontSize="16" Margin="0,0,10,0" VerticalAlignment="Center" Foreground="White"/>
-                    <PasswordBox x:Name="passwordBox" Grid.Row="2" Grid.Column="1" Width="300" Margin="0,5" PasswordChanged="PasswordBox_PasswordChanged"/>
+            <Button Grid.Row="4" Grid.ColumnSpan="2" HorizontalAlignment="Center" Content="Save" Margin="0,10,0,10"/>
 
-
-
-                    <Button Grid.Row="5" Content="Save" Width="150" Margin="139,20,0,0" Grid.Column="1" VerticalAlignment="Top"/>
-                </Grid>
-            </Grid>
-
-            <StackPanel Grid.Column="2" />
+            
         </Grid>
     </Grid>
 </Page>
