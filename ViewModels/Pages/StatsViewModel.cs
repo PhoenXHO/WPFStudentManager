@@ -3,6 +3,7 @@ using GalaSoft.MvvmLight;
 using StudentManager.Models;
 using System.ComponentModel;
 using MySql.Data.MySqlClient;
+using StudentManager.Services;
 
 
 namespace StudentManager.ViewModels.Pages

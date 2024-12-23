@@ -1,6 +1,7 @@
 ﻿using GalaSoft.MvvmLight;
 using MySql.Data.MySqlClient;
 using StudentManager.Models;
+using StudentManager.Services;
 using System.Collections.ObjectModel;
 using System.Data;
 using System.Windows;
@@ -26,7 +27,7 @@ namespace StudentManager.ViewModels.Pages
                 using var connection = DBConnection.GetConnection();
                 await connection.OpenAsync();
 
-                string query = "SELECT majors.Id,  majors.Name,  majors.Description,majors.Responsable as Responsable FROM majors";
+                string query = "SELECT Majors.Id,  Majors.Name,  Majors.Description, Majors.Responsable as Responsable FROM Majors";
 
                 using var command = new MySqlCommand(query, connection);
                 using var reader = await command.ExecuteReaderAsync();
@@ -34,7 +35,7 @@ namespace StudentManager.ViewModels.Pages
                 {
                     var major = new Major
                     {
-                        Id = reader.GetInt32("Id"),
+                        MajorId = reader.GetInt32("Id"),
                         Name = reader.GetString("Name"),
                         Description = reader.GetString("Description"),
                         Responsable = reader.GetString("Responsable")

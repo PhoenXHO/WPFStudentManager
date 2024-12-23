@@ -13,7 +13,7 @@ namespace StudentManager.Models
         private bool _isSelected;
 
 
-        public int Id
+        public int MajorId
 		{
 			get => _id;
 			set
@@ -21,7 +21,7 @@ namespace StudentManager.Models
 				if (_id != value)
 				{
 					_id = value;
-					OnPropertyChanged(nameof(Id));
+					OnPropertyChanged(nameof(MajorId));
 				}
 			}
 		}

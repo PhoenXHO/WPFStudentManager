@@ -4,6 +4,7 @@ using System.Windows;
 using Wpf.Ui.Controls;
 using System.IO;
 using System.Text.Json;
+using StudentManager.Services;
 
 namespace StudentManager.Views.Windows
 {
@@ -26,7 +27,7 @@ namespace StudentManager.Views.Windows
                 connection?.Open();
 
                 // Create a new command
-                using MySqlCommand command = new("SELECT * FROM users WHERE username = @username AND password = @password", connection);
+                using MySqlCommand command = new("SELECT * FROM Users WHERE username = @username AND password = @password", connection);
                 command.Parameters.AddWithValue("@username", usernameField.Text);
                 command.Parameters.AddWithValue("@password", passwordField.Password);
                 command.ExecuteNonQuery();
@@ -45,6 +46,7 @@ namespace StudentManager.Views.Windows
                     File.WriteAllText("session.json", JsonSerializer.Serialize(session));
 
                     MainWindow mainWindow = new();
+                    Application.Current.MainWindow = mainWindow;
                     mainWindow.Show();
                     Close();
                 }

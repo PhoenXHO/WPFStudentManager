@@ -1,9 +1,11 @@
 ﻿using GalaSoft.MvvmLight;
 using MySql.Data.MySqlClient;
 using StudentManager.Models;
+using StudentManager.Services;
 using System.Collections.ObjectModel;
 using System.Data;
 using System.Windows;
+using StudentManager.DataAccess;
 
 namespace StudentManager.ViewModels.Pages
 {
@@ -42,7 +44,7 @@ namespace StudentManager.ViewModels.Pages
         {
             // Create a new ObservableCollection with the 'All' item at the beginning
             MajorsWithAll = new ObservableCollection<Major>(majorsViewModel.Majors);
-            MajorsWithAll.Insert(0, new Major { Id = 0, Name = "Tout", Description = "All Majors", Responsable = "All" });
+            MajorsWithAll.Insert(0, new Major { MajorId = 0, Name = "Tout", Description = "All Majors", Responsable = "All" });
 
             // Initialisation de la liste des étudiants
             Students = new ObservableCollection<Student>();
@@ -55,33 +57,9 @@ namespace StudentManager.ViewModels.Pages
         {
             try
             {
-                using var connection = DBConnection.GetConnection();
-                await connection.OpenAsync();
-
-                string query = @"SELECT students.Id, students.FirstName, students.LastName, students.Email, students.MajorId, students.DateOfBirth, majors.Name as MajorName, majors.Description as MajorDescription,  majors.Responsable as Responsable 
-                                 FROM students LEFT JOIN majors ON students.MajorId = majors.Id";
-
-                using var command = new MySqlCommand(query, connection);
-                using var reader = await command.ExecuteReaderAsync();
-                while (await reader.ReadAsync())
+                var students = await DatabaseRepository.GetAllStudentsAsync();
+                foreach (var student in students)
                 {
-                    var student = new Student
-                    {
-                        Id = reader.GetInt32("Id"),
-                        FirstName = reader.GetString("FirstName"),
-                        LastName = reader.GetString("LastName"),
-                        Email = reader.GetString("Email"),
-                        DateOfBirth = reader.IsDBNull(reader.GetOrdinal("DateOfBirth")) ?
-                                      null : reader.GetDateTime("DateOfBirth"),
-                        Major = new Major
-                        {
-                            Id = reader.GetInt32("MajorId"),
-                            Name = reader.GetString("MajorName"),
-                            Description = reader.GetString("MajorDescription"),
-                            Responsable = reader.GetString("Responsable")
-                        }
-                    };
-
                     Students.Add(student);
                 }
             }
@@ -95,24 +73,9 @@ namespace StudentManager.ViewModels.Pages
         {
             try
             {
-                using var connection = DBConnection.GetConnection();
-                await connection.OpenAsync();
-
-                string query = "SELECT majors.Id,  majors.Name,  majors.Description, majors.Responsable FROM majors";
-
-                using var command = new MySqlCommand(query, connection);
-                using var reader = await command.ExecuteReaderAsync();
-                while (await reader.ReadAsync())
+                var majors = await DatabaseRepository.GetAllMajorsAsync();
+                foreach (var major in majors)
                 {
-                    var major = new Major
-                    {
-                        Id = reader.GetInt32("Id"),
-                        Name = reader.GetString("Name"),
-                        Description = reader.GetString("Description"),
-                        Responsable = reader.GetString("Responsable")
-
-                    };
-
                     MajorsWithAll.Add(major);
                 }
             }

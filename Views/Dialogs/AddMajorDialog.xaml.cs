@@ -1,17 +1,5 @@
 ﻿using StudentManager.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
 using Wpf.Ui.Controls;
 
 namespace StudentManager.Views.Dialogs
@@ -28,8 +16,41 @@ namespace StudentManager.Views.Dialogs
             InitializeComponent();
         }
 
+        private bool ValidateInput()
+        {
+            bool isValid = true;
+
+            // Validate Name
+            if (string.IsNullOrWhiteSpace(NameTextBox.Text))
+            {
+                NameError.Text = "Le nom est obligatoire";
+                NameError.Visibility = Visibility.Visible;
+                isValid = false;
+            }
+            else
+            {
+                NameError.Visibility = Visibility.Collapsed;
+            }
+
+            // Validate Responsable
+            if (string.IsNullOrWhiteSpace(ResponsableTextBox.Text))
+            {
+                ResponsableError.Text = "Le responsable est obligatoire";
+                ResponsableError.Visibility = Visibility.Visible;
+                isValid = false;
+            }
+            else
+            {
+                ResponsableError.Visibility = Visibility.Collapsed;
+            }
+
+            return isValid;
+        }
+
         private void AddButton_Click(object sender, RoutedEventArgs e)
         {
+            if (!ValidateInput()) return;
+
             NewMajor = new Major
             {
                 Name = NameTextBox.Text,
@@ -38,7 +59,6 @@ namespace StudentManager.Views.Dialogs
             };
             DialogResult = true;
         }
-
 
         private void CancelButton_Click(object sender, RoutedEventArgs e)
         {

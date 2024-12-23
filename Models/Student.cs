@@ -1,10 +1,11 @@
 ﻿using MySql.Data.MySqlClient;
+using StudentManager.Services;
 using System.ComponentModel;
 using System.Windows;
 
 namespace StudentManager.Models
 {
-    public class Student : INotifyPropertyChanged
+    public class Student : INotifyPropertyChanged, IEquatable<Student>
     {
         public event PropertyChangedEventHandler? PropertyChanged;
 
@@ -12,9 +13,11 @@ namespace StudentManager.Models
         private string? _firstName;
         private string? _lastName;
         private string? _email;
+        private int? _majorId;
         private Major? _major;
         private DateTime? _dateOfBirth;
-		private bool _isSelected;
+		private string? _picture;
+        private bool _isSelected;
 
         public int Id
 		{
@@ -25,75 +28,93 @@ namespace StudentManager.Models
 				{
 					_id = value;
 					OnPropertyChanged(nameof(Id));
-                    UpdateDatabase("Id", value);
                 }
 			}
 		}
-        public required string? FirstName
+        public string? FirstName
 		{
 			get => _firstName;
-			init
+			set
 			{
 				if (_firstName != value)
 				{
 					_firstName = value;
 					OnPropertyChanged(nameof(FirstName));
-                    UpdateDatabase("FirstName", value);
                 }
 			}
 		}
-		public required string? LastName
+		public string? LastName
 		{
 			get => _lastName;
-			init
+			set
 			{
 				if (_lastName != value)
 				{
 					_lastName = value;
 					OnPropertyChanged(nameof(LastName));
-                    UpdateDatabase("LastName", value);
                 }
 			}
 		}
-		public required string? Email
+		public string? Email
 		{
 			get => _email;
-			init
+			set
 			{
 				if (_email != value)
 				{
 					_email = value;
 					OnPropertyChanged(nameof(Email));
-                    UpdateDatabase("Email", value);
                 }
 			}
 		}
-		public required Major? Major
+        public int? MajorId
+        {
+            get => Major?.MajorId;
+            set
+            {
+                if (_majorId != value)
+                {
+                    _majorId = value;
+                    OnPropertyChanged(nameof(MajorId));
+                }
+            }
+        }
+        public Major? Major
 		{
 			get => _major;
-			init
+			set
 			{
 				if (_major != value)
 				{
 					_major = value;
 					OnPropertyChanged(nameof(Major));
-                    UpdateDatabase("MajorId", value?.Id);
                 }
 			}
 		}
 		public DateTime? DateOfBirth
 		{
 			get => _dateOfBirth;
-			init
+			set
 			{
 				if (_dateOfBirth != value)
 				{
 					_dateOfBirth = value;
 					OnPropertyChanged(nameof(DateOfBirth));
-                    UpdateDatabase("DateOfBirth", value);
                 }
 			}
 		}
+        public string? Picture
+        {
+            get => _picture;
+            set
+            {
+                if (_picture != value)
+                {
+                    _picture = value;
+                    OnPropertyChanged(nameof(Picture));
+                }
+            }
+        }
         public bool IsSelected
         {
             get => _isSelected;
@@ -114,25 +135,18 @@ namespace StudentManager.Models
 			PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
 		}
 
-		private void UpdateDatabase(string propertyName, object value)
+        public bool Equals(Student? other)
         {
-            try
-            {
-                using var connection = DBConnection.GetConnection();
-                connection?.Open();
-
-                var query = $"UPDATE students SET {propertyName} = @Value WHERE Id = @Id";
-                using var command = new MySqlCommand(query, connection);
-
-                command.Parameters.AddWithValue("@Value", value);
-                command.Parameters.AddWithValue("@Id", Id);
-
-                command.ExecuteNonQuery();
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Erreur lors de la mise à jour de l'étudiant: {ex.Message}");
-            }
+			if (other is null) return false;
+			return Id == other.Id;
         }
+
+		public override bool Equals(object? obj) => Equals(obj as Student);
+
+		public override int GetHashCode() => Id.GetHashCode();
+
+		public static bool operator ==(Student? left, Student? right) => Equals(left, right);
+
+		public static bool operator !=(Student? left, Student? right) => !Equals(left, right);
     }
 }

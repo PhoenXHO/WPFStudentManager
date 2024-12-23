@@ -5,8 +5,8 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:StudentManager.Views.Dialogs"
         mc:Ignorable="d"
-        Title="AddMajorDialog" Height="500" Width="400"
-            MinHeight="500"
+        Title="Ajouter une filière"
+                 Height="500" Width="400" MinHeight="500"
         WindowStartupLocation="CenterScreen"
         xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
         ExtendsContentIntoTitleBar="True"
@@ -27,26 +27,33 @@
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
                     <RowDefinition Height="*"/>
                     <RowDefinition Height="Auto"/>
                 </Grid.RowDefinitions>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*"/>
-                </Grid.ColumnDefinitions>
 
-                <TextBlock Text="Nom:" Grid.Row="0" Margin="0,0,0,5"/>
-                <TextBox x:Name="NameTextBox" Grid.Row="1" Margin="0,0,0,10"/>
+                <TextBlock Text="* Les champs marqués d'un astérisque sont obligatoires" 
+                     Grid.Row="0" Margin="0,0,0,10" Foreground="Gray"/>
 
-                <TextBlock Text="Description:" Grid.Row="2" Margin="0,0,0,5"/>
-                <TextBox x:Name="DescriptionTextBox" TextWrapping="Wrap" AcceptsReturn="True" Grid.Row="3" Margin="0,0,0,10"/>
+                <TextBlock Text="Nom:*" Grid.Row="1" Margin="0,0,0,5"/>
+                <TextBox x:Name="NameTextBox" Grid.Row="2" Margin="0,0,0,2"/>
+                <TextBlock x:Name="NameError" Grid.Row="3" Margin="0,0,0,10" 
+                     Foreground="Red" Visibility="Collapsed"/>
 
+                <TextBlock Text="Description:" Grid.Row="4" Margin="0,0,0,5"/>
+                <TextBox x:Name="DescriptionTextBox" TextWrapping="Wrap" AcceptsReturn="True" 
+                    Grid.Row="5" Margin="0,0,0,10"/>
 
-                <TextBlock Text="Responsable:" Grid.Row="4" Margin="0,0,0,5"/>
-                <TextBox x:Name="ResponsableTextBox" Grid.Row="5" Margin="0,0,0,10"/>
+                <TextBlock Text="Responsable:*" Grid.Row="6" Margin="0,0,0,5"/>
+                <TextBox x:Name="ResponsableTextBox" Grid.Row="7" Margin="0,0,0,2"/>
+                <TextBlock x:Name="ResponsableError" Grid.Row="8" Margin="0,0,0,10" 
+                     Foreground="Red" Visibility="Collapsed"/>
 
-                <StackPanel Grid.Row="7" Orientation="Horizontal" HorizontalAlignment="Right">
-                    <Button Content="Cancel" Width="75" Margin="0,0,10,0" Click="CancelButton_Click"/>
-                    <Button Content="Add" Width="75" Click="AddButton_Click"/>
+                <StackPanel Grid.Row="10" Orientation="Horizontal" HorizontalAlignment="Right">
+                    <Button Content="Annuler" Width="75" Margin="0,0,10,0" Click="CancelButton_Click"/>
+                    <Button Content="Ajouter" Width="75" Click="AddButton_Click"/>
                 </StackPanel>
             </Grid>
         </ui:DynamicScrollViewer>

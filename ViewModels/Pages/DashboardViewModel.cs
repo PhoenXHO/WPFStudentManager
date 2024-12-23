@@ -3,6 +3,7 @@ using System.Data;
 using System.Windows;
 using MySql.Data.MySqlClient;
 using StudentManager.Models;
+using StudentManager.Services;
 
 namespace StudentManager.ViewModels.Pages
 {
@@ -100,8 +101,8 @@ namespace StudentManager.ViewModels.Pages
                 using var connection = DBConnection.GetConnection();
                 await connection.OpenAsync();
 
-                string query = @"SELECT students.Id, students.FirstName, students.LastName, students.Email, students.MajorId, students.DateOfBirth, majors.Name as MajorName, majors.Description as MajorDescription, majors.Responsable as Responsable 
-                                 FROM students LEFT JOIN majors ON students.MajorId = majors.Id";
+                string query = @"SELECT Students.Id, Students.FirstName, Students.LastName, Students.Email, Students.MajorId, Students.DateOfBirth, Majors.Name as MajorName, Majors.Description as MajorDescription, Majors.Responsable as Responsable 
+                                 FROM Students LEFT JOIN Majors ON Students.MajorId = Majors.Id";
 
                 using var command = new MySqlCommand(query, connection);
                 using var reader = await command.ExecuteReaderAsync();
@@ -116,7 +117,7 @@ namespace StudentManager.ViewModels.Pages
                         DateOfBirth = reader.IsDBNull(reader.GetOrdinal("DateOfBirth")) ? null : reader.GetDateTime("DateOfBirth"),
                         Major = new Major
                         {
-                            Id = reader.GetInt32("MajorId"),
+                            MajorId = reader.GetInt32("MajorId"),
                             Name = reader.GetString("MajorName"),
                             Description = reader.GetString("MajorDescription"),
                             Responsable = reader.GetString("Responsable")

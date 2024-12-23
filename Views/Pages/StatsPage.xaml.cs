@@ -24,12 +24,6 @@ namespace StudentManager.Views.Pages
             // Instantiate the ViewModel and set as DataContext for binding
             var vm = new StatsViewModel();
             DataContext = vm;
-            System.Diagnostics.Debug.WriteLine($"DataContext set: {DataContext != null}");
-            System.Diagnostics.Debug.WriteLine($"VM MajorStats Count: {vm.MajorStats.Count}");
-            foreach (var stat in vm.MajorStats)
-            {
-                System.Diagnostics.Debug.WriteLine($"Major: {stat.Major}, Count: {stat.StudentCount}");
-            }
         }
     }
 }

@@ -32,6 +32,8 @@ namespace StudentManager.Views.Dialogs
 
         private void SaveButton_Click(object sender, RoutedEventArgs e)
         {
+            if (!ValidateInput()) return;
+
             // Get current major
             var major = (Major)DataContext;
 
@@ -44,6 +46,36 @@ namespace StudentManager.Views.Dialogs
             DialogResult = true;
         }
 
+        private bool ValidateInput()
+        {
+            bool isValid = true;
+
+            // Validate Name
+            if (string.IsNullOrWhiteSpace(NameTextBox.Text))
+            {
+                NameError.Text = "Le nom est obligatoire";
+                NameError.Visibility = Visibility.Visible;
+                isValid = false;
+            }
+            else
+            {
+                NameError.Visibility = Visibility.Collapsed;
+            }
+
+            // Validate Responsable
+            if (string.IsNullOrWhiteSpace(ResponsableTextBox.Text))
+            {
+                ResponsableError.Text = "Le responsable est obligatoire";
+                ResponsableError.Visibility = Visibility.Visible;
+                isValid = false;
+            }
+            else
+            {
+                ResponsableError.Visibility = Visibility.Collapsed;
+            }
+
+            return isValid;
+        }
 
         private void CancelButton_Click(object sender, RoutedEventArgs e)
         {

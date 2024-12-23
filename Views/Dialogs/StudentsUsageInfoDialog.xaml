@@ -3,8 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
         Title="Information d'utilisation"
-        Height="500" Width="600"
-        MinHeight="500" MinWidth="600">
+                 Height="500" Width="600" MinHeight="500" MinWidth="600">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
@@ -12,7 +11,7 @@
             <RowDefinition Height="*"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
-        <ui:TitleBar Title="Information d'utilisation" Grid.Row="0" Icon="{ui:SymbolIcon Info24}"/>
+        <ui:TitleBar Title="Information d'utilisation (étudiants)" Grid.Row="0" Icon="{ui:SymbolIcon Info24}"/>
         <StackPanel Margin="20" Grid.Row="1">
             <TextBlock Text="Voici ce que vous pouvez faire :" FontSize="18" FontWeight="Bold" Margin="0,0,0,10"/>
             <StackPanel Margin="0,0,0,10">
@@ -22,6 +21,8 @@
                 <TextBlock Text="• Vous pouvez rechercher (ou filtrer) des étudiants en utilisant la barre de recherche, qui recherche par ID, prénom ou nom de famille. Il y a aussi une combobox pour filtrer par filière." TextWrapping="Wrap" Margin="0,0,0,5"/>
                 <TextBlock Text="• Lorsqu'une filière est sélectionnée pour le filtrage, ses informations sont affichées sur la carte à droite." TextWrapping="Wrap" Margin="0,0,0,5"/>
                 <TextBlock Text="• Pour modifier les informations d'un étudiant, double-cliquez sur la cellule à modifier, apportez les changements, puis appuyez sur Entrée sur le clavier." TextWrapping="Wrap" Margin="0,0,0,5"/>
+                <TextBlock Text="• Pour voir l'image d'un étudiant, faites un clic droit sur l'image." TextWrapping="Wrap" Margin="0,0,0,5"/>
+                <TextBlock Text="• Pour modifier l'image d'un étudiant, double-cliquez sur l'image." TextWrapping="Wrap" Margin="0,0,0,5"/>
             </StackPanel>
         </StackPanel>
         <StackPanel Grid.Row="2"/>

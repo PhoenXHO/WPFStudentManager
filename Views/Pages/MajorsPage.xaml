@@ -52,6 +52,9 @@
             <ui:Button x:Name="DeleteButton" Content="Supprimer" Width="100" Margin="10,0,10,0" Click="DeleteButton_Click"
                          IsEnabled="{Binding MajorsViewModel.SelectedMajors.Count,
                                              Converter={StaticResource GreaterThanZeroConverter}}"/>
+            <ui:Button Content="Désélectionner tout" Width="150" Margin="10,0,10,0" Click="DeselectAllButton_Click"
+                         IsEnabled="{Binding MajorsViewModel.SelectedMajors.Count,
+                                             Converter={StaticResource GreaterThanZeroConverter}}"/>
         </StackPanel>
 
         <ui:Button Grid.Row="3" Grid.Column="1" Content="" Icon="{ui:SymbolIcon Info24}" Margin="10" Appearance="Primary"

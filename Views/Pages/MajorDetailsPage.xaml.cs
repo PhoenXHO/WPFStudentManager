@@ -1,6 +1,8 @@
 ﻿using MySql.Data.MySqlClient;
 using StudentManager.Models;
+using StudentManager.Services;
 using StudentManager.ViewModels;
+using StudentManager.DataAccess;
 using System.Windows;
 using System.Windows.Controls;
 
@@ -16,6 +18,7 @@ namespace StudentManager.Views.Pages
         public MajorDetailsPage()
         {
             InitializeComponent();
+
             Loaded += MajorDetailsPage_Loaded;
         }
 
@@ -28,7 +31,7 @@ namespace StudentManager.Views.Pages
             mainWindow.BreadcrumbBar.ItemsSource = new[] { "Gestion des filières", CurrentMajor.Name };
         }
 
-        private void EditButton_Click(object sender, RoutedEventArgs e)
+        private async void EditButton_Click(object sender, RoutedEventArgs e)
         {
             var dialog = new Dialogs.EditMajorDialog
             {
@@ -36,8 +39,10 @@ namespace StudentManager.Views.Pages
             };
             if (dialog.ShowDialog() == true)
             {
-                // Update major in database
-                UpdateMajorInDatabase(CurrentMajor);
+                if (await DatabaseRepository.UpdateMajorAsync(CurrentMajor))
+                {
+                    RefreshMajorData();
+                }
             }
         }
 
@@ -47,12 +52,12 @@ namespace StudentManager.Views.Pages
             {
                 using var connection = DBConnection.GetConnection();
                 connection?.Open();
-                var query = "UPDATE majors SET Name = @Name, Description = @Description, Responsable = @Responsable WHERE Id = @Id";
+                var query = "UPDATE Majors SET Name = @Name, Description = @Description, Responsable = @Responsable WHERE Id = @Id";
                 using var command = new MySqlCommand(query, connection);
                 command.Parameters.AddWithValue("@Name", major.Name);
                 command.Parameters.AddWithValue("@Description", major.Description);
                 command.Parameters.AddWithValue("@Responsable", major.Responsable);
-                command.Parameters.AddWithValue("@Id", major.Id);
+                command.Parameters.AddWithValue("@Id", major.MajorId);
 
                 command.ExecuteNonQuery();
 
@@ -71,6 +76,10 @@ namespace StudentManager.Views.Pages
         {
             DataContext = null;
             DataContext = CurrentMajor;
+
+            // Refresh the BreadcrumbBar
+            var mainWindow = (MainWindow)Application.Current.MainWindow;
+            mainWindow.BreadcrumbBar.ItemsSource = new[] { "Gestion des filières", CurrentMajor.Name };
         }
     }
 }
