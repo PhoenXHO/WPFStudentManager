@@ -20,11 +20,6 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
-        
-
-        <TextBlock Grid.Row="0" Grid.ColumnSpan="2" Text="Statistiques"
-            FontSize="24" FontWeight="Bold" Margin="0,10,0,10" Foreground="White"
-            TextAlignment="Center"/>
 
         <TextBlock Grid.Row="1" Grid.ColumnSpan="2" 
             FontWeight="Bold" Margin="0,10,0,10" Foreground="White"

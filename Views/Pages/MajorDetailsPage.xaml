@@ -17,12 +17,6 @@
 		</Grid.RowDefinitions>
 
         <StackPanel Grid.Row="0" Orientation="Vertical">
-            <TextBlock Text="{Binding Name}" 
-                       FontSize="24" 
-                       FontWeight="Bold" 
-                       Margin="0,0,0,20"
-                       Foreground="White"/>
-
             <TextBlock Text="Description:" 
                        FontSize="18" 
                        Margin="0,0,0,10"

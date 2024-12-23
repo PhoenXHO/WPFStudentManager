@@ -1,5 +1,12 @@
 -- Active: 1734040078618@@127.0.0.1@3306@studentmanager
-CREATE TABLE users (
+DROP TABLE IF EXISTS sessions;
+DROP TABLE IF EXISTS students;
+DROP TABLE IF EXISTS majors;
+DROP TABLE IF EXISTS users;
+
+
+
+CREATE TABLE Users (
 	id INT AUTO_INCREMENT PRIMARY KEY,
 	username VARCHAR(255) NOT NULL,
 	password VARCHAR(255) NOT NULL,
@@ -9,44 +16,21 @@ CREATE TABLE users (
 INSERT INTO users (username, password) VALUES ('admin', 'admin');
 
 
-ALTER TABLE Majors
-ADD COLUMN responsable VARCHAR(255);
-
 
 CREATE TABLE Majors (
     Id INT AUTO_INCREMENT PRIMARY KEY,
     Name VARCHAR(255) NOT NULL,
-    Description TEXT
+    Description TEXT,
+	Responsable VARCHAR(255) NOT NULL
 );
 
-INSERT INTO Majors (Name, Description)
-VALUES ('Computer Science', 'The study of computers and computational systems'),
-	   ('Mathematics', 'The study of numbers, quantity, and space'),
-	   ('Physics', 'The study of matter, energy, and the fundamental forces of nature'),
-	   ('Biology', 'The study of living organisms and their interactions with each other and their environments'),
-	   ('Chemistry', 'The study of the composition, structure, properties, and reactions of matter');
+INSERT INTO Majors (Name, Description, Responsable)
+VALUES ('Computer Science', 'The study of computers and computational systems', 'John Doe'),
+	   ('Mathematics', 'The study of numbers, quantity, and space', 'Jane Smith'),
+	   ('Physics', 'The study of matter, energy, and the fundamental forces of nature', 'Albert Einstein'),
+	   ('Biology', 'The study of living organisms and their interactions with each other and their environments', 'Charles Darwin'),
+	   ('Chemistry', 'The study of the composition, structure, properties, and reactions of matter', 'Marie Curie');
 
-
-
-UPDATE Majors
-SET responsable = 'John Doe'
-WHERE Name = 'Computer Science';
-
-UPDATE Majors
-SET responsable = 'Jane Smith'
-WHERE Name = 'Mathematics';
-
-UPDATE Majors
-SET responsable = 'Albert Einstein'
-WHERE Name = 'Physics';
-
-UPDATE Majors
-SET responsable = 'Charles Darwin'
-WHERE Name = 'Biology';
-
-UPDATE Majors
-SET responsable = 'Marie Curie'
-WHERE Name = 'Chemistry';
 
 
 CREATE TABLE Students (
@@ -56,7 +40,7 @@ CREATE TABLE Students (
     Email VARCHAR(255) NOT NULL,
     MajorId INT,
     DateOfBirth DATE,
-    FOREIGN KEY (MajorId) REFERENCES Majors(Id) ON DELETE SET NULL
+    FOREIGN KEY (MajorId) REFERENCES Majors(Id) ON DELETE CASCADE
 );
 
 INSERT INTO Students (FirstName, LastName, Email, MajorId, DateOfBirth)
@@ -76,10 +60,12 @@ VALUES ('John', 'Doe', '...', 1, '1990-01-01'),
 	   ('Larry', 'Brown', '...', 4, '2003-02-02'),
 	   ('Molly', 'White', '...', 5, '2004-03-03');
 
-CREATE TABLE sessions (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    user_id INT,
-    username VARCHAR(255),
-    expiry TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+
+
+CREATE TABLE Sessions (
+    Id INT AUTO_INCREMENT PRIMARY KEY,
+    User_id INT,
+    Username VARCHAR(255),
+    Expiry TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(Id) ON DELETE CASCADE
 );

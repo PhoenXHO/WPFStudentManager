@@ -8,6 +8,8 @@ using StudentManager.Views.Windows;
 using MessageBox = System.Windows.MessageBox;
 using MessageBoxButton = System.Windows.MessageBoxButton;
 using MessageBoxResult = System.Windows.MessageBoxResult;
+using StudentManager.ViewModels;
+using StudentManager.Views.Pages;
 
 namespace StudentManager.Views
 {
@@ -34,8 +36,8 @@ namespace StudentManager.Views
                     // Renew session
                     session.Expiry = Session.DefaultExpiry;
 
-                    // Load user data
-                    // ... (load user data logic here)
+                    // Save session
+                    MainViewModel.CurrentSession = session;
                 }
                 else
                 {
@@ -57,7 +59,7 @@ namespace StudentManager.Views
 
         private void RootNavigation_NavigationRequested(NavigationView sender, NavigatingCancelEventArgs args)
         {
-            if (args.Page.GetType() == typeof(Pages.LogoutPage))
+            if (args.Page.GetType() == typeof(LogoutPage))
             {
                 args.Cancel = true; // Prevent automatic navigation
 
@@ -73,7 +75,7 @@ namespace StudentManager.Views
 
         private void MainWindow_Loaded(object sender, RoutedEventArgs e)
         {
-            RootNavigation.Navigate(typeof(Pages.DashboardPage));
+            RootNavigation.Navigate(typeof(DashboardPage));
 
             Wpf.Ui.Appearance.SystemThemeWatcher.Watch(
                 this,

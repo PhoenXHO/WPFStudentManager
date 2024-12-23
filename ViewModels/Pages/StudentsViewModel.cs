@@ -1,12 +1,9 @@
 ﻿using GalaSoft.MvvmLight;
-using GalaSoft.MvvmLight.Command;
 using MySql.Data.MySqlClient;
 using StudentManager.Models;
-using StudentManager.Views.Windows;
 using System.Collections.ObjectModel;
 using System.Data;
 using System.Windows;
-using System.Windows.Input;
 
 namespace StudentManager.ViewModels.Pages
 {
@@ -14,16 +11,42 @@ namespace StudentManager.ViewModels.Pages
     {
         public ObservableCollection<Student> Students { get; }
         public ObservableCollection<Major> MajorsWithAll { get; set; }
-        public ObservableCollection<Student> SelectedStudents => new(Students.Where(s => s.IsSelected));
+        private ObservableCollection<Student> _selectedStudents;
+        public ObservableCollection<Student> SelectedStudents
+        {
+            get => _selectedStudents;
+            private set
+            {
+                _selectedStudents = value;
+                RaisePropertyChanged();
+            }
+        }
+
+        private Major? _selectedMajor;
+        public Major? SelectedMajor
+        {
+            get => _selectedMajor;
+            set
+            {
+                _selectedMajor = value;
+                RaisePropertyChanged();
+                RaisePropertyChanged(nameof(IsMajorSelected));
+                RaisePropertyChanged(nameof(IsMajorNotSelected));
+            }
+        }
+
+        public bool IsMajorSelected => _selectedMajor != null && _selectedMajor.Name != "Tout";
+        public bool IsMajorNotSelected => !IsMajorSelected;
 
         public StudentsViewModel(MajorsViewModel majorsViewModel)
         {
             // Create a new ObservableCollection with the 'All' item at the beginning
             MajorsWithAll = new ObservableCollection<Major>(majorsViewModel.Majors);
-            MajorsWithAll.Insert(0, new Major { Id = 0, Name = "Tout", Description = "All Majors",Responsable="All"});
+            MajorsWithAll.Insert(0, new Major { Id = 0, Name = "Tout", Description = "All Majors", Responsable = "All" });
 
             // Initialisation de la liste des étudiants
-            Students = [];
+            Students = new ObservableCollection<Student>();
+            SelectedStudents = new ObservableCollection<Student>();
             _ = LoadStudentsAsync(); // Load students asynchronously
             _ = LoadMajorsAsync(); // Load majors asynchronously
         }
@@ -96,6 +119,24 @@ namespace StudentManager.ViewModels.Pages
             catch (Exception ex)
             {
                 MessageBox.Show($"Erreur lors du chargement des majeures: {ex.Message}");
+            }
+        }
+
+        public void AddSelectedStudent(Student student)
+        {
+            if (!SelectedStudents.Contains(student))
+            {
+                SelectedStudents.Add(student);
+                RaisePropertyChanged(nameof(SelectedStudents));
+            }
+        }
+
+        public void RemoveSelectedStudent(Student student)
+        {
+            if (SelectedStudents.Contains(student))
+            {
+                SelectedStudents.Remove(student);
+                RaisePropertyChanged(nameof(SelectedStudents));
             }
         }
     }

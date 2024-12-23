@@ -1,4 +1,5 @@
-﻿using System.Windows.Controls;
+﻿using System.Windows;
+using System.Windows.Controls;
 
 namespace StudentManager.Views.Pages
 {
@@ -10,6 +11,10 @@ namespace StudentManager.Views.Pages
         public SettingsPage()
         {
             InitializeComponent();
+
+            // Set the BreadcrumbBar
+            var mainWindow = (MainWindow)Application.Current.MainWindow;
+            mainWindow.BreadcrumbBar.ItemsSource = new[] { "Paramètres" };
         }
     }
 }

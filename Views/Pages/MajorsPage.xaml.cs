@@ -19,6 +19,10 @@ namespace StudentManager.Views.Pages
         {
             InitializeComponent();
             DataContext = new MainViewModel();
+
+            // Set the BreadcrumbBar
+            var mainWindow = (MainWindow)Application.Current.MainWindow;
+            mainWindow.BreadcrumbBar.ItemsSource = new[] { "Gestion des filières" };
         }
 
         private void AddButton_Click(object sender, RoutedEventArgs e)

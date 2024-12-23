@@ -19,13 +19,17 @@ namespace StudentManager.Views.Pages
             Loaded += MajorDetailsPage_Loaded;
         }
 
-        private void MajorDetailsPage_Loaded(object sender, System.Windows.RoutedEventArgs e)
+        private void MajorDetailsPage_Loaded(object sender, RoutedEventArgs e)
         {
             CurrentMajor = (Major)DataContext;
+
+            // Set the BreadcrumbBar
+            var mainWindow = (MainWindow)Application.Current.MainWindow;
+            mainWindow.BreadcrumbBar.ItemsSource = new[] { "Gestion des filières", CurrentMajor.Name };
         }
 
-		private void EditButton_Click(object sender, System.Windows.RoutedEventArgs e)
-		{
+        private void EditButton_Click(object sender, RoutedEventArgs e)
+        {
             var dialog = new Dialogs.EditMajorDialog
             {
                 DataContext = CurrentMajor
@@ -53,7 +57,7 @@ namespace StudentManager.Views.Pages
                 command.ExecuteNonQuery();
 
                 // Refresh the major data in the major details page
-				RefreshMajorData();
+                RefreshMajorData();
             }
             catch (Exception ex)
             {
@@ -63,8 +67,8 @@ namespace StudentManager.Views.Pages
             }
         }
 
-		private void RefreshMajorData()
-		{
+        private void RefreshMajorData()
+        {
             DataContext = null;
             DataContext = CurrentMajor;
         }

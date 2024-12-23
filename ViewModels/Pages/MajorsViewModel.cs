@@ -1,17 +1,14 @@
 ﻿using GalaSoft.MvvmLight;
-using GalaSoft.MvvmLight.Command;
 using MySql.Data.MySqlClient;
 using StudentManager.Models;
 using System.Collections.ObjectModel;
 using System.Data;
 using System.Windows;
-using System.Windows.Input;
 
 namespace StudentManager.ViewModels.Pages
 {
     public class MajorsViewModel : ViewModelBase
     {
-
         public ObservableCollection<Major> Majors { get; }
         public ObservableCollection<Major> SelectedMajors => new(Majors.Where(m => m.IsSelected));
 
