@@ -6,6 +6,9 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using StudentManager.Models;
 using StudentManager.Views.Windows;
+using System.Windows.Media;
+using StudentManager.Services;
+using StudentManager.DataAccess;
 
 namespace StudentManager.Views.Pages
 {
@@ -16,14 +19,19 @@ namespace StudentManager.Views.Pages
     {
         private bool _isShiftPressed;
         private int _lastSelectedIndex = -1;
+        private bool _lastSelectedIndexSet = false;
 
         public StudentsPage()
         {
             InitializeComponent();
             DataContext = new MainViewModel();
+
+            // Set the BreadcrumbBar
+            var mainWindow = (MainWindow)Application.Current.MainWindow;
+            mainWindow.BreadcrumbBar.ItemsSource = new[] { "Gestion des étudiants" };
         }
 
-        private void AddButton_Click(object sender, RoutedEventArgs e)
+        private async void AddButton_Click(object sender, RoutedEventArgs e)
         {
             var mainViewModel = (MainViewModel)DataContext;
             var dialog = new Dialogs.AddStudentDialog
@@ -33,39 +41,58 @@ namespace StudentManager.Views.Pages
 
             if (dialog.ShowDialog() == true)
             {
-
                 var student = dialog.NewStudent;
-                AddStudentToDatabase(student);
-                mainViewModel.StudentsViewModel.Students.Add(student);
+                if (await DatabaseRepository.AddStudentAsync(student))
+                {
+                    mainViewModel.StudentsViewModel.Students.Add(student);
+                }
             }
         }
 
-        private static void AddStudentToDatabase(Student student)
+        private void Image_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
-            try
+            if (e.ClickCount == 2)
             {
-                using var connection = DBConnection.GetConnection();
-                connection?.Open();
-                var query = @"INSERT INTO students (FirstName, LastName, Email, MajorId, DateOfBirth)
-                              VALUES (@FirstName, @LastName, @Email, @MajorId, @DateOfBirth)";
-                using var command = new MySqlCommand(query, connection);
-                command.Parameters.AddWithValue("@FirstName", student.FirstName);
-                command.Parameters.AddWithValue("@LastName", student.LastName);
-                command.Parameters.AddWithValue("@Email", student.Email);
-                command.Parameters.AddWithValue("@MajorId", student.Major?.Id);
-                command.Parameters.AddWithValue("@DateOfBirth", student.DateOfBirth);
-
-                command.ExecuteNonQuery();
-                long id=command.LastInsertedId;
-                student.Id=(int)id;
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Erreur lors de l'ajout de l'étudiant : {ex.Message}");
+                var student = (Student)((Image)sender).DataContext;
+                HandleImageUpload(student);
             }
         }
 
-        private void DeleteButton_Click(object sender, RoutedEventArgs e)
+        private void Image_MouseRightButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            var student = (Student)((Image)sender).DataContext;
+            var dialog = new Dialogs.ViewImageDialog
+            {
+                DataContext = student
+            };
+            dialog.ShowDialog();
+        }
+
+        private void HandleImageUpload(Student student)
+        {
+            var openFileDialog = new Microsoft.Win32.OpenFileDialog
+            {
+                Filter = "Image files (*.jpg, *.jpeg, *.png) | *.jpg; *.jpeg; *.png"
+            };
+
+            if (openFileDialog.ShowDialog() == true)
+            {
+                string filePath = openFileDialog.FileName;
+                // TODO: Upload the image to the server and get the URL
+                // string imageUrl = UploadImageToServer(filePath);
+
+                // For now, we'll just use the local file path as the URL
+                string imageUrl = filePath;
+
+                student.Picture = imageUrl;
+                // TODO: Update the image URL in the database
+                // UpdateStudentPictureInDatabase(student.Id, imageUrl);
+
+                MessageBox.Show("L'image a été mise à jour avec succès.", "Succès", MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+        }
+
+        private async void DeleteButton_Click(object sender, RoutedEventArgs e)
         {
             var result = MessageBox.Show("Voulez-vous vraiment supprimer l'étudiant sélectionné(s) ?",
                 "Confirmation de suppression", MessageBoxButton.YesNo, MessageBoxImage.Question);
@@ -78,33 +105,11 @@ namespace StudentManager.Views.Pages
             var selectedStudents = mainViewModel.StudentsViewModel.Students.Where(s => s.IsSelected).ToList();
             foreach (var student in selectedStudents)
             {
-                // Remove the student from the database
-                DeleteStudentFromDatabase(student);
-                // Remove the student from the Students collection
-                mainViewModel.StudentsViewModel.Students.Remove(student);
-            }
-
-            // Uncheck the Select All checkbox if all students are unselected
-            if (mainViewModel.StudentsViewModel.SelectedStudents.Count == 0)
-            {
-                SelectAllCheckBox.IsChecked = false;
-            }
-        }
-
-        private static void DeleteStudentFromDatabase(Student student)
-        {
-            try
-            {
-                using var connection = DBConnection.GetConnection();
-                connection?.Open();
-                var query = "DELETE FROM students WHERE Id = @Id";
-                using var command = new MySqlCommand(query, connection);
-                command.Parameters.AddWithValue("@Id", student.Id);
-                command.ExecuteNonQuery();
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Erreur lors de la suppression de l'étudiant : {ex.Message}");
+                if (await DatabaseRepository.DeleteStudentAsync(student.Id))
+                {
+                    mainViewModel.StudentsViewModel.Students.Remove(student);
+                    mainViewModel.StudentsViewModel.RemoveSelectedStudent(student);
+                }
             }
         }
 
@@ -114,38 +119,65 @@ namespace StudentManager.Views.Pages
             student.IsSelected = true;
             // Set the last selected index to the current index
             _lastSelectedIndex = ((DataGridRow)UIDataGrid.ItemContainerGenerator.ContainerFromItem(student)).GetIndex();
-            // Raise the PropertyChanged event for SelectedStudents
-            ((MainViewModel)DataContext).StudentsViewModel.RaisePropertyChanged(nameof(StudentsViewModel.SelectedStudents));
+            _lastSelectedIndexSet = true;
+            // Add the student to the selected students collection
+            ((MainViewModel)DataContext).StudentsViewModel.AddSelectedStudent(student);
         }
 
         private void CheckBox_Unchecked(object sender, RoutedEventArgs e)
         {
             var student = (Student)((CheckBox)sender).DataContext;
             student.IsSelected = false;
-            // Raise the PropertyChanged event for SelectedStudents
-            ((MainViewModel)DataContext).StudentsViewModel.RaisePropertyChanged(nameof(StudentsViewModel.SelectedStudents));
+            // Set the last selected index to the current index
+            _lastSelectedIndex = ((DataGridRow)UIDataGrid.ItemContainerGenerator.ContainerFromItem(student)).GetIndex();
+            _lastSelectedIndexSet = false;
+            // Remove the student from the selected students collection
+            ((MainViewModel)DataContext).StudentsViewModel.RemoveSelectedStudent(student);
         }
 
-        private void SelectAllCheckBox_Checked(object sender, RoutedEventArgs e)
+        private static T? FindVisualChild<T>(DependencyObject? obj) where T : DependencyObject
         {
-            var mainViewModel = (MainViewModel)DataContext;
-            for (int i = 0; i < mainViewModel.StudentsViewModel.Students.Count; i++)
+            for (int i = 0; i < VisualTreeHelper.GetChildrenCount(obj); i++)
             {
-                mainViewModel.StudentsViewModel.Students[i].IsSelected = true;
+                DependencyObject child = VisualTreeHelper.GetChild(obj, i);
+                if (child != null && child is T item)
+                {
+                    return item;
+                }
+                else
+                {
+                    T? childOfChild = FindVisualChild<T>(child);
+                    if (childOfChild != null)
+                    {
+                        return childOfChild;
+                    }
+                }
             }
-            // Raise the PropertyChanged event for SelectedStudents
-            mainViewModel.StudentsViewModel.RaisePropertyChanged(nameof(StudentsViewModel.SelectedStudents));
+            return null;
         }
 
-        private void SelectAllCheckBox_Unchecked(object sender, RoutedEventArgs e)
+        private void UpdateCheckBoxes()
         {
             var mainViewModel = (MainViewModel)DataContext;
-            for (int i = 0; i < mainViewModel.StudentsViewModel.Students.Count; i++)
+            foreach (var student in mainViewModel.StudentsViewModel.Students)
             {
-                mainViewModel.StudentsViewModel.Students[i].IsSelected = false;
+                // Queue container check after UI update
+                Dispatcher.BeginInvoke(new Action(() =>
+                {
+                    if (UIDataGrid.ItemContainerGenerator.ContainerFromItem(student) is DataGridRow row)
+                    {
+                        var cell = UIDataGrid.Columns[0].GetCellContent(row)?.Parent as DataGridCell;
+                        if (cell != null)
+                        {
+                            var checkBox = FindVisualChild<CheckBox>(cell);
+                            if (checkBox != null)
+                            {
+                                checkBox.IsChecked = student.IsSelected;
+                            }
+                        }
+                    }
+                }), System.Windows.Threading.DispatcherPriority.Background);
             }
-            // Raise the PropertyChanged event for SelectedStudents
-            mainViewModel.StudentsViewModel.RaisePropertyChanged(nameof(StudentsViewModel.SelectedStudents));
         }
 
         private void DataGrid_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
@@ -165,12 +197,13 @@ namespace StudentManager.Views.Pages
                         {
                             if (dataGrid?.Items[i] is Student student)
                             {
-                                student.IsSelected = !student.IsSelected;
+                                student.IsSelected = _lastSelectedIndexSet;
                             }
                         }
                     }
                     _lastSelectedIndex = currentIndex;
-                    
+                    _lastSelectedIndexSet = !_lastSelectedIndexSet;
+
                     e.Handled = true;
                 }
             }
@@ -198,56 +231,29 @@ namespace StudentManager.Views.Pages
             MessageBox.Show($"Viewing details for {student.FirstName} {student.LastName}");
         }
 
-        private void SearchTextBox_TextChanged(object sender, TextChangedEventArgs e)
+        private async void SearchTextBox_TextChanged(object sender, TextChangedEventArgs e)
         {
             var mainViewModel = (MainViewModel)DataContext;
-            //var filter = SearchTextBox.Text;
-            var filter = '%' + SearchTextBox.Text + '%';
+            var filter = SearchTextBox.Text;
 
             try
             {
-                using var connection = DBConnection.GetConnection();
-                connection?.Open();
-                var query = @"SELECT students.Id, students.FirstName, students.LastName, students.Email, 
-                              students.MajorId, students.DateOfBirth, majors.Name as MajorName, majors.Description as MajorDescription 
-                              FROM students 
-                              LEFT JOIN majors ON students.MajorId = majors.Id 
-                              WHERE CAST(students.Id AS CHAR) LIKE @filter 
-                              OR students.FirstName LIKE @filter 
-                              OR students.LastName LIKE @filter";
+                var students = await DatabaseRepository.GetAllStudentsAsync();
+                var filteredStudents = students.Where(s => 
+                    s.Id.ToString().Contains(filter) ||
+                    s.FirstName.Contains(filter) ||
+                    s.LastName.Contains(filter)
+                );
 
-                using var command = new MySqlCommand(query, connection);
-                command.Parameters.AddWithValue("@filter", $"{filter}");
-
-                using var reader = command.ExecuteReader();
-                var students = new List<Student>();
-
-                while (reader.Read())
-                {
-                    students.Add(new Student
-                    {
-                        Id = reader.GetInt32("Id"),
-                        FirstName = reader.GetString("FirstName"),
-                        LastName = reader.GetString("LastName"),
-                        Email = reader.GetString("Email"),
-                        Major = new Major
-                        {
-                            Id = reader.GetInt32("MajorId"),
-                            Name = reader.GetString("MajorName"),
-                            Description = reader.GetString("MajorDescription")
-                        },
-                        DateOfBirth = reader.GetDateTime("DateOfBirth")
-                    });
-                }
-
-                // Update the DataGrid's ItemsSource
-                //UIDataGrid.ItemsSource = students;
-                // Clear and update the Students collection instead of replacing the ItemsSource
                 mainViewModel.StudentsViewModel.Students.Clear();
-                foreach (var student in students)
+                foreach (var student in filteredStudents)
                 {
+                    student.IsSelected = mainViewModel.StudentsViewModel.SelectedStudents
+                        .Any(s => s.Id == student.Id);
                     mainViewModel.StudentsViewModel.Students.Add(student);
                 }
+
+                UpdateCheckBoxes();
             }
             catch (Exception ex)
             {
@@ -255,66 +261,34 @@ namespace StudentManager.Views.Pages
             }
         }
 
-        private void MajorComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        private async void MajorComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             var mainViewModel = (MainViewModel)DataContext;
-            var selectedMajor = MajorComboBoxSe.SelectedItem as Major;
+            var selectedMajor = MajorComboBox.SelectedItem as Major;
 
             try
             {
-                using var connection = DBConnection.GetConnection();
-                connection?.Open();
-                string query;
-                MySqlCommand command;
-
-                // If "Tout" is selected, show all students, regardless of major
-                if (MajorComboBoxSe.SelectedIndex == 0 || (selectedMajor != null && selectedMajor.Name == "Tout"))
+                IEnumerable<Student> students;
+                if (MajorComboBox.SelectedIndex == 0 || (selectedMajor != null && selectedMajor.Name == "Tout"))
                 {
-                    query = @"SELECT students.Id, students.FirstName, students.LastName, students.Email, 
-                              students.MajorId, students.DateOfBirth, majors.Name as MajorName, majors.Description as MajorDescription 
-                              FROM students 
-                              LEFT JOIN majors ON students.MajorId = majors.Id"; // No filter
-                    command = new MySqlCommand(query, connection);
+                    students = await DatabaseRepository.GetAllStudentsAsync();
+                    mainViewModel.StudentsViewModel.SelectedMajor = null;
                 }
-                // If a major is selected, filter the students by major
                 else
                 {
-                    query = @"SELECT students.Id, students.FirstName, students.LastName, students.Email, 
-                              students.MajorId, students.DateOfBirth, majors.Name as MajorName, majors.Description as MajorDescription 
-                              FROM students 
-                              LEFT JOIN majors ON students.MajorId = majors.Id 
-                              WHERE majors.Name = @MajorName"; // Filter by major name
-                    command = new MySqlCommand(query, connection);
-                    command.Parameters.AddWithValue("@MajorName", selectedMajor.Name);
+                    students = await DatabaseRepository.GetStudentsByMajorAsync(selectedMajor.Name);
+                    mainViewModel.StudentsViewModel.SelectedMajor = selectedMajor;
                 }
 
-                using var reader = command.ExecuteReader();
-                var students = new List<Student>();
-
-                while (reader.Read())
-                {
-                    students.Add(new Student
-                    {
-                        Id = reader.GetInt32("Id"),
-                        FirstName = reader.GetString("FirstName"),
-                        LastName = reader.GetString("LastName"),
-                        Email = reader.GetString("Email"),
-                        Major = new Major
-                        {
-                            Id = reader.GetInt32("MajorId"),
-                            Name = reader.GetString("MajorName"),
-                            Description = reader.GetString("MajorDescription")
-                        },
-                        DateOfBirth = reader.GetDateTime("DateOfBirth")
-                    });
-                }
-
-                // Update the DataGrid's ItemsSource
                 mainViewModel.StudentsViewModel.Students.Clear();
                 foreach (var student in students)
                 {
+                    student.IsSelected = mainViewModel.StudentsViewModel.SelectedStudents
+                        .Any(s => s.Id == student.Id);
                     mainViewModel.StudentsViewModel.Students.Add(student);
                 }
+
+                UpdateCheckBoxes();
             }
             catch (Exception ex)
             {
@@ -326,6 +300,37 @@ namespace StudentManager.Views.Pages
         {
             var dialog = new StudentsUsageInfoDialog();
             dialog.ShowDialog();
+        }
+
+        private void DeselectAllButton_Click(object sender, RoutedEventArgs e)
+        {
+            var mainViewModel = (MainViewModel)DataContext;
+            var SelectedStudents = mainViewModel.StudentsViewModel.SelectedStudents.ToList();
+            foreach (var student in SelectedStudents)
+            {
+                student.IsSelected = false;
+            }
+            // Raise the PropertyChanged event for SelectedStudents
+            mainViewModel.StudentsViewModel.RaisePropertyChanged(nameof(StudentsViewModel.SelectedStudents));
+        }
+
+        private async void UIDataGrid_CellEditEnding(object sender, DataGridCellEditEndingEventArgs e)
+        {
+            if (e.EditAction == DataGridEditAction.Commit)
+            {
+                var student = (Student)e.Row.Item;
+                if (await DatabaseRepository.UpdateStudentAsync(student))
+                {
+                    // Success - the property has already been updated via binding
+                }
+                else
+                {
+                    // Failed to update database - revert the change
+                    MessageBox.Show("Failed to update the student information", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    // Refresh the row to show original data
+                    UIDataGrid.Items.Refresh();
+                }
+            }
         }
     }
 }

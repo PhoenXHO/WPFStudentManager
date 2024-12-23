@@ -9,6 +9,7 @@ obj/
 *.userosscache
 *.sln.docstates
 appsettings.json
+.env
 
 # Mono Auto Generated Files
 mono_crash.*

@@ -5,8 +5,8 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:StudentManager.Views.Dialogs"
         mc:Ignorable="d"
-        Title="AddStudentDialog" Height="500" Width="400"
-                 MinHeight="500"
+        Title="Ajouter un étudiant"
+                 Height="500" Width="400" MinHeight="500"
         WindowStartupLocation="CenterScreen"
         xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
         ExtendsContentIntoTitleBar="True"
@@ -19,45 +19,79 @@
         
         <ui:TitleBar Title="Add Student" Grid.Row="0" Grid.ColumnSpan="2" Icon="{ui:SymbolIcon Add24}"/>
 
-        <Grid Margin="10" Grid.Row="1">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="*"/>
-                <RowDefinition Height="Auto"/>
-            </Grid.RowDefinitions>
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*"/>
-            </Grid.ColumnDefinitions>
+        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+            <Grid Margin="10">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
 
-            <TextBlock Text="Nom:" Grid.Row="0" Margin="0,0,0,5"/>
-            <TextBox x:Name="LastNameTextBox" Grid.Row="1" Margin="0,0,0,10"/>
+                <TextBlock Text="* Les champs marqués d'un astérisque sont obligatoires" 
+                         Grid.Row="0" Margin="0,0,0,10" Foreground="Gray"/>
 
-            <TextBlock Text="Prénom:" Grid.Row="2" Margin="0,0,0,5"/>
-            <TextBox x:Name="FirstNameTextBox" Grid.Row="3" Margin="0,0,0,10"/>
+                <TextBlock Text="Nom:*" Grid.Row="1" Margin="0,0,0,5"/>
+                <TextBox x:Name="LastNameTextBox" Grid.Row="2" Margin="0,0,0,2"/>
+                <TextBlock x:Name="LastNameError" Grid.Row="3" Margin="0,0,0,10" 
+                         Foreground="Red" Visibility="Collapsed"/>
 
-            <TextBlock Text="Email:" Grid.Row="4" Margin="0,0,0,5"/>
-            <TextBox x:Name="EmailTextBox" Grid.Row="5" Margin="0,0,0,10"/>
+                <TextBlock Text="Prénom:*" Grid.Row="4" Margin="0,0,0,5"/>
+                <TextBox x:Name="FirstNameTextBox" Grid.Row="5" Margin="0,0,0,2"/>
+                <TextBlock x:Name="FirstNameError" Grid.Row="6" Margin="0,0,0,10" 
+                         Foreground="Red" Visibility="Collapsed"/>
 
-            <TextBlock Text="Filière:" Grid.Row="6" Margin="0,0,0,5"/>
-            <ComboBox x:Name="MajorComboBox" Grid.Row="7" Margin="0,0,0,10"
-                      ItemsSource="{Binding Majors}" DisplayMemberPath="Name" SelectionChanged="MajorComboBox_SelectionChanged"/>
+                <TextBlock Text="Email:" Grid.Row="7" Margin="0,0,0,5"/>
+                <TextBox x:Name="EmailTextBox" Grid.Row="8" Margin="0,0,0,10"/>
 
-            <TextBlock Text="Date de naissance:" Grid.Row="8" Margin="0,0,0,5"/>
-            <DatePicker x:Name="DateOfBirthPicker" Grid.Row="9" Margin="0,0,0,10"/>
+                <TextBlock Text="Filière:*" Grid.Row="9" Margin="0,0,0,5"/>
+                <ComboBox x:Name="MajorComboBox" Grid.Row="10" Margin="0,0,0,10"
+                          ItemsSource="{Binding Majors}" DisplayMemberPath="Name" 
+                          SelectionChanged="MajorComboBox_SelectionChanged"/>
+                <TextBlock x:Name="MajorError" Grid.Row="11" Margin="0,0,0,10" 
+                         Foreground="Red" Visibility="Collapsed"/>
 
-            <StackPanel Grid.Row="11" Orientation="Horizontal" HorizontalAlignment="Right">
-                <Button Content="Cancel" Width="75" Margin="0,0,10,0" Click="CancelButton_Click"/>
-                <Button Content="Add" Width="75" Click="AddButton_Click"/>
-            </StackPanel>
-        </Grid>
+                <TextBlock Text="Date de naissance:*" Grid.Row="12" Margin="0,0,0,5"/>
+                <DatePicker x:Name="DateOfBirthPicker" Grid.Row="13" Margin="0,0,0,2"/>
+                <TextBlock x:Name="DateOfBirthError" Grid.Row="14" Margin="0,0,0,10" 
+                         Foreground="Red" Visibility="Collapsed"/>
+
+                <TextBlock Text="Photo:*" Grid.Row="15" Margin="0,0,0,5"/>
+                <Grid Grid.Row="16" Margin="0,0,0,2">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <Image x:Name="PreviewImage" Width="50" Height="50" Margin="0,0,10,0"
+                           Stretch="UniformToFill"/>
+                    <Button Grid.Column="1" Content="Choisir une image" Click="ChooseImage_Click"/>
+                </Grid>
+                <TextBlock x:Name="PictureError" Grid.Row="17" Margin="0,0,0,10" 
+                         Foreground="Red" Visibility="Collapsed"/>
+
+                <StackPanel Grid.Row="18" Orientation="Horizontal" HorizontalAlignment="Right">
+                    <Button Content="Annuler" Width="75" Margin="0,0,10,0" Click="CancelButton_Click"/>
+                    <Button Content="Ajouter" Width="75" Click="AddButton_Click"/>
+                </StackPanel>
+            </Grid>
+        </ScrollViewer>
     </Grid>
 </ui:FluentWindow>

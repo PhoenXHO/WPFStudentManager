@@ -9,10 +9,11 @@ namespace StudentManager.Models
         private int _id;
         private string? _name;
         private string? _description;
+		public string _responsable;
         private bool _isSelected;
 
 
-        public int Id
+        public int MajorId
 		{
 			get => _id;
 			set
@@ -20,7 +21,7 @@ namespace StudentManager.Models
 				if (_id != value)
 				{
 					_id = value;
-					OnPropertyChanged(nameof(Id));
+					OnPropertyChanged(nameof(MajorId));
 				}
 			}
 		}
@@ -48,6 +49,18 @@ namespace StudentManager.Models
 				}
 			}
 		}
+        public required string? Responsable
+        {
+            get => _responsable;
+            set
+            {
+                if (_responsable != value)
+                {
+                    _responsable = value;
+                    OnPropertyChanged(nameof(Responsable));
+                }
+            }
+        }
 
         public bool IsSelected
         {

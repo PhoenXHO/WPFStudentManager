@@ -13,6 +13,7 @@
 
     <Page.Resources>
         <converters:GreaterThanZeroConverter x:Key="GreaterThanZeroConverter"/>
+        <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
     </Page.Resources>
 
     <Grid Margin="10">
@@ -23,17 +24,13 @@
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="260"/>
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
 
-        <TextBlock Grid.Row="0" Grid.ColumnSpan="2" Text="Gestion des étudiants"
-                   FontSize="24" FontWeight="Bold" Margin="0,10,0,30" Foreground="White"
-                   TextAlignment="Center"/>
-
-        <StackPanel Grid.Row="1" Grid.Column="1" Orientation="Horizontal" Margin="0,10,0,10" HorizontalAlignment="Center">
+        <StackPanel Grid.Row="1" Grid.Column="1" Orientation="Horizontal" Margin="0,10,0,20" HorizontalAlignment="Center">
             <TextBlock Text="Selectionner la filière:" VerticalAlignment="Center" Margin="0,0,10,0" Foreground="White"/>
-            <ComboBox x:Name="MajorComboBoxSe" Width="200" Margin="0,0,10,0" SelectedIndex="0"
+            <ComboBox x:Name="MajorComboBox" Width="200" Margin="0,0,10,0" SelectedIndex="0"
                       ItemsSource="{Binding StudentsViewModel.MajorsWithAll}" DisplayMemberPath="Name"
                       SelectionChanged="MajorComboBox_SelectionChanged"/>
             <TextBlock Text="Recherche:" VerticalAlignment="Center" Margin="0,0,10,0" Foreground="White"/>
@@ -41,14 +38,33 @@
                         PlaceholderText="Rechercher un étudiant" TextChanged="SearchTextBox_TextChanged"/>
         </StackPanel>
 
-        <ui:Card Grid.Row="2" Grid.Column="0" VerticalAlignment="Top" Margin="10" MinWidth="250">
+        <ui:Card Grid.Row="2" Grid.Column="0" Margin="0,0,5,0" VerticalAlignment="Top">
             <StackPanel>
-                <TextBlock Text="Informations sur la filière:" FontSize="16" FontWeight="Bold" Margin="10"/>
-                <TextBlock Text="This is the content of the card." Margin="10" TextWrapping="Wrap"/>
+                <TextBlock Text="Informations sur la filière" FontWeight="Bold" FontSize="16"/>
+                <GroupItem Margin="10,10,10,0"
+                           Visibility="{Binding StudentsViewModel.IsMajorSelected,
+                                                Converter={StaticResource BooleanToVisibilityConverter}}">
+                    <StackPanel>
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+                            <TextBlock Text="Nom:" TextWrapping="Wrap" FontStyle="Italic" TextDecorations="Underline"/>
+                            <TextBlock Text="{Binding StudentsViewModel.SelectedMajor.Name}" TextWrapping="Wrap" Margin="10,0,0,0"/>
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+                            <TextBlock Text="Responsable:" TextWrapping="Wrap" FontStyle="Italic" TextDecorations="Underline"/>
+                            <TextBlock Text="{Binding StudentsViewModel.SelectedMajor.Responsable}" TextWrapping="Wrap" Margin="10,0,0,0"/>
+                        </StackPanel>
+                        <TextBlock Text="Description:" TextWrapping="Wrap" FontStyle="Italic" TextDecorations="Underline"/>
+                        <TextBlock Text="{Binding StudentsViewModel.SelectedMajor.Description}" TextWrapping="Wrap" Margin="10,10,0,0"/>
+                    </StackPanel>
+                </GroupItem>
+                <TextBlock Margin="10,10,10,0" Foreground="Yellow" FontStyle="Italic"
+                           Text="Veuillez sélectionner une filière."
+                           Visibility="{Binding StudentsViewModel.IsMajorNotSelected,
+                                                Converter={StaticResource BooleanToVisibilityConverter}}"/>
             </StackPanel>
         </ui:Card>
 
-        <ui:DataGrid x:Name="UIDataGrid" Grid.Row="2" Grid.Column="1" AutoGenerateColumns="False" Margin="10"
+        <ui:DataGrid x:Name="UIDataGrid" Grid.Row="2" Grid.Column="1" AutoGenerateColumns="False" Margin="5,0,10,0"
                      Height="Auto" MaxHeight="500"
                      HorizontalAlignment="Stretch"
                      VerticalAlignment="Top"
@@ -60,14 +76,12 @@
                      CanUserAddRows="False"
                      PreviewMouseLeftButtonDown="DataGrid_PreviewMouseLeftButtonDown"
                      PreviewKeyDown="DataGrid_PreviewKeyDown"
-                     PreviewKeyUp="DataGrid_PreviewKeyUp">
+                     PreviewKeyUp="DataGrid_PreviewKeyUp"
+                     CellEditEnding="UIDataGrid_CellEditEnding">
 
             <ui:DataGrid.Columns>
+                <!-- IsSelected - CheckBox -->
                 <DataGridTemplateColumn Width="30" MaxWidth="30" MinWidth="30">
-                    <DataGridTemplateColumn.Header>
-                        <CheckBox x:Name="SelectAllCheckBox" Content="Tout sélectionner" ToolTip="Sélectionner tous les étudiants"
-                          Checked="SelectAllCheckBox_Checked" Unchecked="SelectAllCheckBox_Unchecked"/>
-                    </DataGridTemplateColumn.Header>
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
                             <CheckBox IsChecked="{Binding IsSelected, Mode=TwoWay}"
@@ -75,15 +89,44 @@
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
+
+                <!-- ID - TextColumn -->
                 <DataGridTextColumn Header="ID" Binding="{Binding Id}" MinWidth="30" IsReadOnly="True"/>
-                <DataGridTextColumn Header="Nom" Binding="{Binding LastName, Mode=TwoWay}" Width="*" MinWidth="60"/>
-                <DataGridTextColumn Header="Prénom" Binding="{Binding FirstName, Mode=TwoWay}" Width="*" MinWidth="60"/>
+
+                <!-- LastName - TextColumn -->
+                <DataGridTemplateColumn Header="Nom" Width="*" MinWidth="60">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding LastName}" ToolTipService.ToolTip="Double-cliquez pour éditer le nom"/>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                    <DataGridTemplateColumn.CellEditingTemplate>
+                        <DataTemplate>
+                            <TextBox Text="{Binding LastName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellEditingTemplate>
+                </DataGridTemplateColumn>
+
+                <!-- FirstName - TextColumn -->
+                <DataGridTemplateColumn Header="Prénom" Width="*" MinWidth="60">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding FirstName}" ToolTipService.ToolTip="Double-cliquez pour éditer le prénom"/>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                    <DataGridTemplateColumn.CellEditingTemplate>
+                        <DataTemplate>
+                            <TextBox Text="{Binding FirstName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellEditingTemplate>
+                </DataGridTemplateColumn>
 
                 <!-- Major - ComboBox -->
                 <DataGridTemplateColumn Header="Filière" Width="1.5*" MinWidth="150">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
-                            <TextBlock Text="{Binding Major.Name}"/>
+                            <TextBlock Text="{Binding Major.Name}"
+                                       ToolTipService.ToolTip="Double-cliquez pour éditer la filière"/>
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                     <DataGridTemplateColumn.CellEditingTemplate>
@@ -97,10 +140,11 @@
                 </DataGridTemplateColumn>
 
                 <!-- Date of birth - DatePicker -->
-                <DataGridTemplateColumn Header="Date de naissance" Width="3*" MinWidth="150">
+                <DataGridTemplateColumn Header="Date de naissance" Width="3*" MinWidth="120">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
-                            <TextBlock Text="{Binding DateOfBirth, StringFormat=dd/MM/yyyy}"/>
+                            <TextBlock Text="{Binding DateOfBirth, StringFormat=dd/MM/yyyy}"
+                                       ToolTipService.ToolTip="Double-cliquez pour éditer la date de naissance"/>
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                     <DataGridTemplateColumn.CellEditingTemplate>
@@ -112,14 +156,40 @@
                     </DataGridTemplateColumn.CellEditingTemplate>
                 </DataGridTemplateColumn>
 
-                <DataGridTextColumn Header="Email" Binding="{Binding Email, Mode=TwoWay}" Width="3*" MinWidth="200"/>
+                <!-- Email - TextColumn -->
+                <DataGridTemplateColumn Header="Email" Width="3*" MinWidth="120">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding Email}" ToolTipService.ToolTip="Double-cliquez pour éditer l'email"/>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                    <DataGridTemplateColumn.CellEditingTemplate>
+                        <DataTemplate>
+                            <TextBox Text="{Binding Email, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellEditingTemplate>
+                </DataGridTemplateColumn>
+
+                <!-- Picture - Image -->
+                <DataGridTemplateColumn Header="Photo" Width="Auto" MinWidth="100">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <Image Source="{Binding Picture}" Width="50" Height="50"
+                                   MouseLeftButtonDown="Image_MouseLeftButtonDown"
+                                   MouseRightButtonDown="Image_MouseRightButtonDown"
+                                   ToolTipService.ToolTip="Double-cliquez pour changer la photo, clic droit pour la voir en grand"/>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
             </ui:DataGrid.Columns>
         </ui:DataGrid>
-
 
         <StackPanel Grid.Row="3" Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Left" Margin="0,10,0,10">
             <ui:Button Content="Ajouter" Width="100" Margin="10,0,10,0" Click="AddButton_Click"/>
             <ui:Button Content="Supprimer" Width="100" Margin="10,0,10,0" Click="DeleteButton_Click"
+                         IsEnabled="{Binding StudentsViewModel.SelectedStudents.Count,
+                                             Converter={StaticResource GreaterThanZeroConverter}}"/>
+            <ui:Button Content="Désélectionner tout" Margin="10,0,10,0" Click="DeselectAllButton_Click"
                          IsEnabled="{Binding StudentsViewModel.SelectedStudents.Count,
                                              Converter={StaticResource GreaterThanZeroConverter}}"/>
         </StackPanel>

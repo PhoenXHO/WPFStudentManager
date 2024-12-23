@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:StudentManager.Views"
         mc:Ignorable="d"
         Title="Gestion des Étudiants" Height="800" Width="1280"
-                 MinHeight="500" MinWidth="1000"
+                 MinHeight="500" MinWidth="1280"
         WindowStartupLocation="CenterScreen"
         xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
         ExtendsContentIntoTitleBar="True"
@@ -19,12 +19,16 @@
                            FooterMenuItemsSource="{Binding FooterMenuItems}"
                            TitleBar="{Binding ElementName=TitleBar, Mode=OneWay}"
                            FrameMargin="0">
-            <!--<ui:NavigationView.Header>
-                <ui:BreadcrumbBar
-                      Margin="42,32,0,0"
-                      FontSize="28"
-                      FontWeight="DemiBold" />
-            </ui:NavigationView.Header>-->
+            <ui:NavigationView.Header>
+                <ui:BreadcrumbBar x:Name="BreadcrumbBar"
+                                  Margin="42,32,42,20">
+                    <ui:BreadcrumbBar.ItemTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding}" FontSize="28"/>
+                        </DataTemplate>
+                    </ui:BreadcrumbBar.ItemTemplate>
+                </ui:BreadcrumbBar>
+            </ui:NavigationView.Header>
         </ui:NavigationView>
     </Grid>
 </ui:FluentWindow>

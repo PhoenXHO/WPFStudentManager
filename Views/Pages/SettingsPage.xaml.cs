@@ -1,11 +1,11 @@
-﻿using MySql.Data.MySqlClient;
+using MySql.Data.MySqlClient;
 using StudentManager.Models;
 using System.Diagnostics;
 using System.IO;
 using System.Text.Json;
 using System.Windows;
 using System.Windows.Controls;
-
+using StudentManager.ViewModels;
 
 namespace StudentManager.Views.Pages
 {
@@ -17,27 +17,13 @@ namespace StudentManager.Views.Pages
         {
             InitializeComponent();
 
-            // Load session
-            var session = LoadSession();
-            if (session != null)
-            {
-                // Load user details from the database
-                _user = LoadUser(session.UserId);
-                DataContext = _user; // Bind user data to the page's DataContext
-            }
-        }
+            // Set the BreadcrumbBar
+            var mainWindow = (MainWindow)Application.Current.MainWindow;
+            mainWindow.BreadcrumbBar.ItemsSource = new[] { "Paramètres" };
 
-        private Session? LoadSession()
-        {
-            try
-            {
-                var sessionJson = File.ReadAllText("session.json");
-                return JsonSerializer.Deserialize<Session>(sessionJson);
-            }
-            catch (Exception)
-            {
-                return null;
-            }
+            // Load user details from the database
+            _user = LoadUser(MainViewModel.CurrentSession.UserId);
+            DataContext = _user; // Bind user data to the page's DataContext
         }
 
         private User LoadUser(int userId)
@@ -72,6 +58,7 @@ namespace StudentManager.Views.Pages
                 return null;
             }
         }
+
         private void PasswordBox_PasswordChanged(object sender, RoutedEventArgs e)
         {
             var passwordBox = sender as PasswordBox;
@@ -86,11 +73,6 @@ namespace StudentManager.Views.Pages
                 Debug.WriteLine("PasswordBox est nul.");
             }
         }
-
-
-
-
-
 
         private void SaveButton_Click(object sender, RoutedEventArgs e)
         {

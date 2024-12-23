@@ -9,5 +9,6 @@
       Title="LogoutPage">
 
     <Grid>
+        <!-- Just an empty page that is inaccessable to the user -->
     </Grid>
 </Page>

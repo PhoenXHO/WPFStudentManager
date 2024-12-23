@@ -5,6 +5,8 @@ using StudentManager.ViewModels.Pages;
 using System.Windows;
 using System.Windows.Controls;
 using StudentManager.Views.Windows;
+using StudentManager.Services;
+using StudentManager.DataAccess;
 
 namespace StudentManager.Views.Pages
 {
@@ -19,9 +21,13 @@ namespace StudentManager.Views.Pages
         {
             InitializeComponent();
             DataContext = new MainViewModel();
+
+            // Set the BreadcrumbBar
+            var mainWindow = (MainWindow)Application.Current.MainWindow;
+            mainWindow.BreadcrumbBar.ItemsSource = new[] { "Gestion des filières" };
         }
 
-        private void AddButton_Click(object sender, RoutedEventArgs e)
+        private async void AddButton_Click(object sender, RoutedEventArgs e)
         {
             var mainViewModel = (MainViewModel)DataContext;
             var dialog = new Dialogs.AddMajorDialog
@@ -31,27 +37,10 @@ namespace StudentManager.Views.Pages
             if (dialog.ShowDialog() == true)
             {
                 var major = dialog.NewMajor;
-                AddMajorToDatabase(major);
-
-                mainViewModel.MajorsViewModel.Majors.Add(major);
-            }
-        }
-        private static void AddMajorToDatabase(Major major)
-        {
-            try
-            {
-                using var connection = DBConnection.GetConnection();
-                connection?.Open();
-                var query = "INSERT INTO majors (Name, Description) VALUES (@Name, @Description)";
-                using var command = new MySqlCommand(query, connection);
-                command.Parameters.AddWithValue("@Name", major.Name);
-                command.Parameters.AddWithValue("@Description", major.Description);
-
-                command.ExecuteNonQuery();
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Erreur lors de l'ajout de l fill : {ex.Message}");
+                if (await DatabaseRepository.AddMajorAsync(major))
+                {
+                    mainViewModel.MajorsViewModel.Majors.Add(major);
+                }
             }
         }
 
@@ -60,7 +49,7 @@ namespace StudentManager.Views.Pages
             // TODO: Implement
         }
 
-        private void DeleteButton_Click(object sender, RoutedEventArgs e)
+        private async void DeleteButton_Click(object sender, RoutedEventArgs e)
         {
             // Prompt the user to confirm the deletion (in French)
             var result = MessageBox.Show("Voulez-vous vraiment supprimer les filières sélectionnées ? " +
@@ -76,25 +65,10 @@ namespace StudentManager.Views.Pages
             var selectedMajors = mainViewModel.MajorsViewModel.Majors.Where(m => m.IsSelected).ToList();
             foreach (var major in selectedMajors)
             {
-                DeleteMajorFromDatabase(major);
-                mainViewModel.MajorsViewModel.Majors.Remove(major);
-            }
-        }
-
-        private static void DeleteMajorFromDatabase(Major major)
-        {
-            try
-            {
-                using var connection = DBConnection.GetConnection();
-                connection?.Open();
-                var query = "DELETE FROM Majors WHERE Id = @Id";
-                using var command = new MySqlCommand(query, connection);
-                command.Parameters.AddWithValue("@Id", major.Id);
-                command.ExecuteNonQuery();
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Erreur lors de la suppression de la fil : {ex.Message}");
+                if (await DatabaseRepository.DeleteMajorAsync(major.MajorId))
+                {
+                    mainViewModel.MajorsViewModel.Majors.Remove(major);
+                }
             }
         }
 
@@ -119,16 +93,20 @@ namespace StudentManager.Views.Pages
             mainViewModel.RootNavigation.Navigate(typeof(MajorDetailsPage), major);
         }
 
-        private void InfoButton_Click(object sender, RoutedEventArgs e)
-        {
-            var major = (Major)((Button)sender).DataContext;
-            MessageBox.Show($"Viewing details for {major.Name}");
-        }
-
         private void ViewUsageInfoButton_Click(object sender, RoutedEventArgs e)
         {
             var dialog = new MajorsUsageInfoDialog();
             dialog.ShowDialog();
+        }
+
+        private void DeselectAllButton_Click(object sender, RoutedEventArgs e)
+        {
+            var mainViewModel = (MainViewModel)DataContext;
+            foreach (var major in mainViewModel.MajorsViewModel.Majors)
+            {
+                major.IsSelected = false;
+            }
+            mainViewModel.MajorsViewModel.RaisePropertyChanged(nameof(MajorsViewModel.SelectedMajors));
         }
     }
 }
