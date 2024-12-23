@@ -42,10 +42,11 @@ namespace StudentManager.Views.Pages
             {
                 using var connection = DBConnection.GetConnection();
                 connection?.Open();
-                var query = "INSERT INTO majors (Name, Description) VALUES (@Name, @Description)";
+                var query = "INSERT INTO majors (Name, Description, Responsable) VALUES (@Name, @Description, @Responsable)";
                 using var command = new MySqlCommand(query, connection);
                 command.Parameters.AddWithValue("@Name", major.Name);
                 command.Parameters.AddWithValue("@Description", major.Description);
+                command.Parameters.AddWithValue("@Responsable", major.Responsable);
 
                 command.ExecuteNonQuery();
             }

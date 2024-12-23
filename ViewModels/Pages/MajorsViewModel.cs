@@ -11,6 +11,7 @@ namespace StudentManager.ViewModels.Pages
 {
     public class MajorsViewModel : ViewModelBase
     {
+
         public ObservableCollection<Major> Majors { get; }
         public ObservableCollection<Major> SelectedMajors => new(Majors.Where(m => m.IsSelected));
 
@@ -28,7 +29,7 @@ namespace StudentManager.ViewModels.Pages
                 using var connection = DBConnection.GetConnection();
                 await connection.OpenAsync();
 
-                string query = "SELECT majors.Id,  majors.Name,  majors.Description FROM majors";
+                string query = "SELECT majors.Id,  majors.Name,  majors.Description,majors.Responsable as Responsable FROM majors";
 
                 using var command = new MySqlCommand(query, connection);
                 using var reader = await command.ExecuteReaderAsync();
@@ -38,7 +39,8 @@ namespace StudentManager.ViewModels.Pages
                     {
                         Id = reader.GetInt32("Id"),
                         Name = reader.GetString("Name"),
-                        Description = reader.GetString("Description")
+                        Description = reader.GetString("Description"),
+                        Responsable = reader.GetString("Responsable")
                     };
 
                     Majors.Add(major);

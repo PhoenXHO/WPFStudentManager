@@ -34,7 +34,9 @@
         <StackPanel Grid.Row="1" Grid.Column="1" Orientation="Horizontal" Margin="0,10,0,10" HorizontalAlignment="Center">
             <TextBlock Text="Selectionner la filière:" VerticalAlignment="Center" Margin="0,0,10,0" Foreground="White"/>
             <ComboBox x:Name="MajorComboBoxSe" Width="200" Margin="0,0,10,0" SelectedIndex="0"
+                      
                       ItemsSource="{Binding StudentsViewModel.MajorsWithAll}" DisplayMemberPath="Name"
+                      
                       SelectionChanged="MajorComboBox_SelectionChanged"/>
             <TextBlock Text="Recherche:" VerticalAlignment="Center" Margin="0,0,10,0" Foreground="White"/>
             <ui:TextBox x:Name="SearchTextBox" Width="200" Margin="0,0,10,0"
@@ -44,9 +46,13 @@
         <ui:Card Grid.Row="2" Grid.Column="0" VerticalAlignment="Top" Margin="10" MinWidth="250">
             <StackPanel>
                 <TextBlock Text="Informations sur la filière:" FontSize="16" FontWeight="Bold" Margin="10"/>
-                <TextBlock Text="This is the content of the card." Margin="10" TextWrapping="Wrap"/>
+                <TextBlock Text="{Binding selectedMajor.Name}" Margin="10" TextWrapping="Wrap"/>
+                <TextBlock Text="Responsable" Margin="10" TextWrapping="Wrap"/>
+                <TextBlock Text="{Binding selectedMajor.Responsable}" Margin="10" TextWrapping="Wrap"/>
+                <!-- Affiche le responsable -->
             </StackPanel>
         </ui:Card>
+
 
         <ui:DataGrid x:Name="UIDataGrid" Grid.Row="2" Grid.Column="1" AutoGenerateColumns="False" Margin="10"
                      Height="Auto" MaxHeight="500"

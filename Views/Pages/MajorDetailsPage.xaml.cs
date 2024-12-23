@@ -43,10 +43,11 @@ namespace StudentManager.Views.Pages
             {
                 using var connection = DBConnection.GetConnection();
                 connection?.Open();
-                var query = "UPDATE majors SET Name = @Name, Description = @Description WHERE Id = @Id";
+                var query = "UPDATE majors SET Name = @Name, Description = @Description, Responsable = @Responsable WHERE Id = @Id";
                 using var command = new MySqlCommand(query, connection);
                 command.Parameters.AddWithValue("@Name", major.Name);
                 command.Parameters.AddWithValue("@Description", major.Description);
+                command.Parameters.AddWithValue("@Responsable", major.Responsable);
                 command.Parameters.AddWithValue("@Id", major.Id);
 
                 command.ExecuteNonQuery();
