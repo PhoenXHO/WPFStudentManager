@@ -1,29 +1,54 @@
 using System.ComponentModel;
-using System.Data;
-using System.Windows;
-using MySql.Data.MySqlClient;
-using StudentManager.Models;
-using StudentManager.Services;
+using System.Runtime.CompilerServices;
 
 namespace StudentManager.ViewModels.Pages
 {
     public class DashboardViewModel : INotifyPropertyChanged
     {
-        private string _studentsPerMajorText;
+        private string _greetingMessage;
+        private string _appIntroduction;
+        private string _recentActivities;
+        private string _notifications;
         private int _totalMajors;
         private int _totalStudents;
-        private string _welcomeMessage;
 
-        public string StudentsPerMajorText
+        public string GreetingMessage
         {
-            get => _studentsPerMajorText;
+            get => _greetingMessage;
             set
             {
-                if (_studentsPerMajorText != value)
-                {
-                    _studentsPerMajorText = value;
-                    OnPropertyChanged(nameof(StudentsPerMajorText));
-                }
+                _greetingMessage = value;
+                OnPropertyChanged();
+            }
+        }
+
+        public string AppIntroduction
+        {
+            get => _appIntroduction;
+            set
+            {
+                _appIntroduction = value;
+                OnPropertyChanged();
+            }
+        }
+
+        public string RecentActivities
+        {
+            get => _recentActivities;
+            set
+            {
+                _recentActivities = value;
+                OnPropertyChanged();
+            }
+        }
+
+        public string Notifications
+        {
+            get => _notifications;
+            set
+            {
+                _notifications = value;
+                OnPropertyChanged();
             }
         }
 
@@ -32,11 +57,8 @@ namespace StudentManager.ViewModels.Pages
             get => _totalMajors;
             set
             {
-                if (_totalMajors != value)
-                {
-                    _totalMajors = value;
-                    OnPropertyChanged(nameof(TotalMajors));
-                }
+                _totalMajors = value;
+                OnPropertyChanged();
             }
         }
 
@@ -45,93 +67,27 @@ namespace StudentManager.ViewModels.Pages
             get => _totalStudents;
             set
             {
-                if (_totalStudents != value)
-                {
-                    _totalStudents = value;
-                    OnPropertyChanged(nameof(TotalStudents));
-                }
+                _totalStudents = value;
+                OnPropertyChanged();
             }
-        }
-
-        public string WelcomeMessage
-        {
-            get => _welcomeMessage;
-            set
-            {
-                if (_welcomeMessage != value)
-                {
-                    _welcomeMessage = value;
-                    OnPropertyChanged(nameof(WelcomeMessage));
-                }
-            }
-        }
-
-        public event PropertyChangedEventHandler PropertyChanged;
-
-        protected virtual void OnPropertyChanged(string propertyName)
-        {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
 
         public DashboardViewModel()
         {
-            LoadAndProcessStudentData();
-            WelcomeMessage = $"Bienvenue, {MainViewModel.CurrentSession?.Username}!";
+            // Initialize properties with sample data
+            var currentUser = MainViewModel.CurrentSession.Username;
+            GreetingMessage = $"Bonjour {currentUser}, Bienvenue dans notre application de gestion des étudiants!";
+            AppIntroduction = "Bienvenue dans Student Manager, votre assistant intelligent pour gérer et explorer les données des étudiants ! Avec une interface conviviale, l'application vous permet de visualiser facilement des statistiques essentielles, comme le nombre d'étudiants par filière, grâce à des graphiques interactifs 3D. Que vous souhaitiez suivre les informations académiques ou obtenir des insights utiles, Student Manager est là pour vous simplifier la vie et vous aider à prendre les meilleures décisions.";
+            
+            TotalMajors = 5; // Replace with actual data from the database
+            TotalStudents = 200; // Replace with actual data from the database
         }
 
-        private async void LoadAndProcessStudentData()
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        protected void OnPropertyChanged([CallerMemberName] string propertyName = null)
         {
-            var students = await LoadStudentDataFromDbAsync();
-            var studentsPerMajor = students
-                .GroupBy(s => s.Major?.Name ?? "Non attribué")
-                .ToDictionary(g => g.Key, g => g.Count());
-
-            TotalMajors = studentsPerMajor.Count;
-            TotalStudents = students.Count();
-
-            StudentsPerMajorText = string.Join("\n",
-                studentsPerMajor.Select(kv => $"- {kv.Key}: {kv.Value} étudiant{(kv.Value > 1 ? "s" : "")}"));
-        }
-
-        private async Task<IEnumerable<Student>> LoadStudentDataFromDbAsync()
-        {
-            var students = new List<Student>();
-            try
-            {
-                using var connection = DBConnection.GetConnection();
-                await connection.OpenAsync();
-
-                string query = @"SELECT Students.Id, Students.FirstName, Students.LastName, Students.Email, Students.MajorId, Students.DateOfBirth, Majors.Name as MajorName, Majors.Description as MajorDescription, Majors.Responsable as Responsable 
-                                 FROM Students LEFT JOIN Majors ON Students.MajorId = Majors.Id";
-
-                using var command = new MySqlCommand(query, connection);
-                using var reader = await command.ExecuteReaderAsync();
-                while (await reader.ReadAsync())
-                {
-                    var student = new Student
-                    {
-                        Id = reader.GetInt32("Id"),
-                        FirstName = reader.GetString("FirstName"),
-                        LastName = reader.GetString("LastName"),
-                        Email = reader.GetString("Email"),
-                        DateOfBirth = reader.IsDBNull(reader.GetOrdinal("DateOfBirth")) ? null : reader.GetDateTime("DateOfBirth"),
-                        Major = new Major
-                        {
-                            MajorId = reader.GetInt32("MajorId"),
-                            Name = reader.GetString("MajorName"),
-                            Description = reader.GetString("MajorDescription"),
-                            Responsable = reader.GetString("Responsable")
-                        }
-                    };
-
-                    students.Add(student);
-                }
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Erreur lors de la récupération des étudiants: {ex.Message}");
-            }
-            return students;
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
     }
 }

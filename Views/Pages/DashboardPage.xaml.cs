@@ -13,7 +13,6 @@ namespace StudentManager.Views.Pages
         {
             InitializeComponent();
             DataContext = new DashboardViewModel();
-
             Loaded += DashboardPage_Loaded;
         }
 

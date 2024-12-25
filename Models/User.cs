@@ -20,7 +20,6 @@ namespace StudentManager.Models
                 {
                     _id = value;
                     OnPropertyChanged(nameof(Id));
-                    UpdateDatabase("Id", value);
                 }
             }
         }
@@ -33,7 +32,6 @@ namespace StudentManager.Models
                 {
                     _username = value;
                     OnPropertyChanged(nameof(Username));
-                    UpdateDatabase("Username", value);
                 }
             }
         }
@@ -46,7 +44,6 @@ namespace StudentManager.Models
                 {
                     _email = value;
                     OnPropertyChanged(nameof(Email));
-                    UpdateDatabase("Email", value);
                 }
             }
         }
@@ -59,30 +56,12 @@ namespace StudentManager.Models
                 {
                     _password = value;
                     OnPropertyChanged(nameof(Password));
-                    UpdateDatabase("Password", value); // Consider hashing passwords before saving.
                 }
             }
         }
         protected void OnPropertyChanged(string propertyName)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-        }
-        private void UpdateDatabase(string propertyName, object? value)
-        {
-            try
-            {
-                using var connection = DBConnection.GetConnection();
-                connection?.Open();
-                var query = $"UPDATE Users SET {propertyName} = @Value WHERE Id = @Id";
-                using var command = new MySqlCommand(query, connection);
-                command.Parameters.AddWithValue("@Value", value ?? DBNull.Value);
-                command.Parameters.AddWithValue("@Id", Id);
-                command.ExecuteNonQuery();
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Error updating user: {ex.Message}");
-            }
         }
     }
 }

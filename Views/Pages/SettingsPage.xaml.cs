@@ -15,7 +15,8 @@ namespace StudentManager.Views.Pages
     /// </summary>
     public partial class SettingsPage : Page
     {
-		private User _user;
+        private User _user;
+        private User _tempUser;
 
         public SettingsPage()
         {
@@ -26,7 +27,16 @@ namespace StudentManager.Views.Pages
             mainWindow.BreadcrumbBar.ItemsSource = new[] { "Paramètres" };
             // Load user details from the database
             _user = LoadUser(MainViewModel.CurrentSession.UserId);
-            DataContext = _user; // Bind user data to the page's DataContext
+
+            _tempUser = new User
+            {
+                Id = _user.Id,
+                Username = _user.Username,
+                Email = _user.Email,
+                Password = _user.Password
+            };
+
+            DataContext = _tempUser; // Bind user data to the page's DataContext
         }
         private User LoadUser(int userId)
         {
@@ -57,26 +67,47 @@ namespace StudentManager.Views.Pages
                 return null;
             }
         }
+
         private void PasswordBox_PasswordChanged(object sender, RoutedEventArgs e)
         {
-            var passwordBox = sender as PasswordBox;
-            if (passwordBox != null)
+            if (sender is PasswordBox passwordBox)
             {
-                // Mettre à jour la propriété Password de l'objet User
-                _user.Password = passwordBox.Password;
-            }
-            else
-            {
-                Debug.WriteLine("PasswordBox est nul.");
+                _tempUser.Password = passwordBox.Password;
             }
         }
+
         private void SaveButton_Click(object sender, RoutedEventArgs e)
         {
-            // Save the changes to the user information
-            _user.Username = usernameTextBox.Text;
-            _user.Email = emailTextBox.Text;
-            _user.Password = passwordBox.Password;
-            MessageBox.Show("Changes saved successfully!");
+            _tempUser.Password = passwordBox.Password;
+            try
+            {
+                using var connection = DBConnection.GetConnection();
+                connection?.Open();
+
+                string query = "UPDATE Users SET Username = @Username, Email = @Email, Password = @Password WHERE Id = @Id";
+                using var command = new MySqlCommand(query, connection);
+                command.Parameters.AddWithValue("@Username", _tempUser.Username);
+                command.Parameters.AddWithValue("@Email", _tempUser.Email);
+                command.Parameters.AddWithValue("@Password", _tempUser.Password); // Hash the password in a real application
+                command.Parameters.AddWithValue("@Id", _tempUser.Id);
+
+                command.ExecuteNonQuery();
+
+                // Update the original user object after saving
+                _user.Username = _tempUser.Username;
+                _user.Email = _tempUser.Email;
+                _user.Password = _tempUser.Password;
+                passwordBox.Password = "";
+
+                MessageBox.Show("Changes saved successfully!");
+
+                
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error saving changes: {ex.Message}");
+            }
         }
+
     }
 }
