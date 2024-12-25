@@ -32,7 +32,7 @@
             
             <!-- X and Z Axes Configuration -->
             <telerik:RadCartesianChart3D.XAxis>
-                <telerik:CategoricalAxis3D Title="Major" Foreground="White">
+                <telerik:CategoricalAxis3D Title="Filières" Foreground="White">
                     <telerik:CategoricalAxis3D.LineStyle>
                         <Style TargetType="Path">
                             <Setter Property="Stroke" Value="White"/>
@@ -48,7 +48,8 @@
             </telerik:RadCartesianChart3D.XAxis>
 
             <telerik:RadCartesianChart3D.ZAxis>
-                <telerik:LinearAxis3D Title="Student Count" Foreground="White" Minimum="0" Maximum="{Binding MaxStudentMajor.StudentCount}">
+                <telerik:LinearAxis3D Title="Nombre d'étudiants" Foreground="White"
+                                      Minimum="0" Maximum="{Binding MaxStudentMajor.StudentCount}">
                     <telerik:LinearAxis3D.LineStyle>
                         <Style TargetType="Path">
                             <Setter Property="Stroke" Value="White"/>

@@ -1,6 +1,5 @@
 ﻿using StudentManager.ViewModels;
 using StudentManager.ViewModels.Pages;
-using MySql.Data.MySqlClient;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -54,7 +53,7 @@ namespace StudentManager.Views.Pages
             if (e.ClickCount == 2)
             {
                 var student = (Student)((Image)sender).DataContext;
-                HandleImageUpload(student);
+                _ = HandleImageUploadAsync(student);
             }
         }
 
@@ -68,7 +67,7 @@ namespace StudentManager.Views.Pages
             dialog.ShowDialog();
         }
 
-        private void HandleImageUpload(Student student)
+        private static async Task HandleImageUploadAsync(Student student)
         {
             var openFileDialog = new Microsoft.Win32.OpenFileDialog
             {
@@ -78,15 +77,8 @@ namespace StudentManager.Views.Pages
             if (openFileDialog.ShowDialog() == true)
             {
                 string filePath = openFileDialog.FileName;
-                // TODO: Upload the image to the server and get the URL
-                // string imageUrl = UploadImageToServer(filePath);
-
-                // For now, we'll just use the local file path as the URL
-                string imageUrl = filePath;
-
-                student.Picture = imageUrl;
-                // TODO: Update the image URL in the database
-                // UpdateStudentPictureInDatabase(student.Id, imageUrl);
+                student.Picture = CloudinaryService.UploadImage(filePath);
+                await DatabaseRepository.UpdateStudentAsync(student);
 
                 MessageBox.Show("L'image a été mise à jour avec succès.", "Succès", MessageBoxButton.OK, MessageBoxImage.Information);
             }
@@ -107,6 +99,7 @@ namespace StudentManager.Views.Pages
             {
                 if (await DatabaseRepository.DeleteStudentAsync(student.Id))
                 {
+                    CloudinaryService.DeleteImage(student.Picture);
                     mainViewModel.StudentsViewModel.Students.Remove(student);
                     mainViewModel.StudentsViewModel.RemoveSelectedStudent(student);
                 }

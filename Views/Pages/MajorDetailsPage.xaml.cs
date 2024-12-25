@@ -46,32 +46,6 @@ namespace StudentManager.Views.Pages
             }
         }
 
-        private void UpdateMajorInDatabase(Major major)
-        {
-            try
-            {
-                using var connection = DBConnection.GetConnection();
-                connection?.Open();
-                var query = "UPDATE Majors SET Name = @Name, Description = @Description, Responsable = @Responsable WHERE Id = @Id";
-                using var command = new MySqlCommand(query, connection);
-                command.Parameters.AddWithValue("@Name", major.Name);
-                command.Parameters.AddWithValue("@Description", major.Description);
-                command.Parameters.AddWithValue("@Responsable", major.Responsable);
-                command.Parameters.AddWithValue("@Id", major.MajorId);
-
-                command.ExecuteNonQuery();
-
-                // Refresh the major data in the major details page
-                RefreshMajorData();
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show("An error occurred while updating the major in the database.\n" +
-                    ex.Message,
-                    "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-            }
-        }
-
         private void RefreshMajorData()
         {
             DataContext = null;

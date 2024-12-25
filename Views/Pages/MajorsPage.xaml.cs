@@ -44,11 +44,6 @@ namespace StudentManager.Views.Pages
             }
         }
 
-        private void EditButton_Click(object sender, RoutedEventArgs e)
-        {
-            // TODO: Implement
-        }
-
         private async void DeleteButton_Click(object sender, RoutedEventArgs e)
         {
             // Prompt the user to confirm the deletion (in French)
@@ -67,9 +62,11 @@ namespace StudentManager.Views.Pages
             {
                 if (await DatabaseRepository.DeleteMajorAsync(major.MajorId))
                 {
-                    mainViewModel.MajorsViewModel.Majors.Remove(major);
+                    CacheService.Majors.Remove(major);
                 }
             }
+            mainViewModel.MajorsViewModel.SelectedMajors.Clear();
+            mainViewModel.MajorsViewModel.RaisePropertyChanged(nameof(MajorsViewModel.SelectedMajors));
         }
 
         private void CheckBox_Checked(object sender, RoutedEventArgs e)

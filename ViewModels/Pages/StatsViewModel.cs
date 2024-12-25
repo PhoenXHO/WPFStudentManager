@@ -59,12 +59,12 @@ namespace StudentManager.ViewModels.Pages
             using var connection = DBConnection.GetConnection();
             connection?.Open();
 
-            var query = @" SELECT M.Name AS Major, COUNT(S.Id) AS StudentCount
-                        FROM Majors M
-                        LEFT JOIN Students S ON M.Id = S.MajorId
-                        GROUP BY M.Name
-                        ORDER BY StudentCount DESC
-                        LIMIT 1";
+            var query = @"SELECT M.Name AS Major, COUNT(S.Id) AS StudentCount
+                          FROM Majors M
+                          LEFT JOIN Students S ON M.Id = S.MajorId
+                          GROUP BY M.Name
+                          ORDER BY StudentCount DESC
+                          LIMIT 1";
 
             using var command = new MySqlCommand(query, connection);
             using var reader = command.ExecuteReader();
@@ -78,7 +78,5 @@ namespace StudentManager.ViewModels.Pages
                 };
             }
         }
-
-
     }
 }

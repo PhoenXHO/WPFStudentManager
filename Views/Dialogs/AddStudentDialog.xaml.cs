@@ -1,11 +1,9 @@
 ﻿using StudentManager.Models;
-using StudentManager.ViewModels;
 using System.Windows;
 using System.Windows.Media.Imaging;
 using Wpf.Ui.Controls;
 using CloudinaryDotNet;
 using CloudinaryDotNet.Actions;
-using dotenv.net;
 using StudentManager.Services;
 
 namespace StudentManager.Views.Dialogs
@@ -111,7 +109,7 @@ namespace StudentManager.Views.Dialogs
 
             if (MajorComboBox.SelectedItem is Major selectedMajor)
             {
-                string imageUrl = UploadImageToCloudinary(_selectedImagePath);
+                string imageUrl = CloudinaryService.UploadImage(_selectedImagePath);
 
                 NewStudent = new Student
                 {
@@ -128,17 +126,6 @@ namespace StudentManager.Views.Dialogs
             {
                 System.Windows.MessageBox.Show("Veuillez sélectionner une filière.");
             }
-        }
-
-        private string UploadImageToCloudinary(string filePath)
-        {
-            var cloudinary = CloudinaryService.GetCloudinary();
-            var uploadParams = new ImageUploadParams()
-            {
-                File = new FileDescription(filePath)
-            };
-            var uploadResult = cloudinary.Upload(uploadParams);
-            return uploadResult.SecureUrl.AbsoluteUri;
         }
 
         private void CancelButton_Click(object sender, RoutedEventArgs e)

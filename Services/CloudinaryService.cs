@@ -1,4 +1,5 @@
 using CloudinaryDotNet;
+using CloudinaryDotNet.Actions;
 using dotenv.net;
 
 namespace StudentManager.Services
@@ -17,6 +18,23 @@ namespace StudentManager.Services
         public static Cloudinary GetCloudinary()
         {
             return _cloudinary ?? throw new InvalidOperationException("Cloudinary is not initialized.");
+        }
+
+        public static string UploadImage(string filePath)
+        {
+            var cloudinary = GetCloudinary();
+            var uploadParams = new ImageUploadParams()
+            {
+                File = new FileDescription(filePath)
+            };
+            var uploadResult = cloudinary.Upload(uploadParams);
+            return uploadResult.SecureUrl.AbsoluteUri;
+        }
+
+        public static void DeleteImage(string publicId)
+        {
+            var cloudinary = GetCloudinary();
+            var result = cloudinary.DeleteResources(publicId);
         }
     }
 }

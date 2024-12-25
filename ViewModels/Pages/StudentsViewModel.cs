@@ -1,9 +1,7 @@
 ﻿using GalaSoft.MvvmLight;
-using MySql.Data.MySqlClient;
 using StudentManager.Models;
 using StudentManager.Services;
 using System.Collections.ObjectModel;
-using System.Data;
 using System.Windows;
 using StudentManager.DataAccess;
 
@@ -11,7 +9,7 @@ namespace StudentManager.ViewModels.Pages
 {
     public class StudentsViewModel : ViewModelBase
     {
-        public ObservableCollection<Student> Students { get; }
+        public ObservableCollection<Student> Students => CacheService.Students;
         public ObservableCollection<Major> MajorsWithAll { get; set; }
         private ObservableCollection<Student> _selectedStudents;
         public ObservableCollection<Student> SelectedStudents
@@ -47,7 +45,6 @@ namespace StudentManager.ViewModels.Pages
             MajorsWithAll.Insert(0, new Major { MajorId = 0, Name = "Tout", Description = "All Majors", Responsable = "All" });
 
             // Initialisation de la liste des étudiants
-            Students = new ObservableCollection<Student>();
             SelectedStudents = new ObservableCollection<Student>();
             _ = LoadStudentsAsync(); // Load students asynchronously
             _ = LoadMajorsAsync(); // Load majors asynchronously
@@ -57,10 +54,13 @@ namespace StudentManager.ViewModels.Pages
         {
             try
             {
-                var students = await DatabaseRepository.GetAllStudentsAsync();
-                foreach (var student in students)
+                if (Students.Count == 0)
                 {
-                    Students.Add(student);
+                    var students = await DatabaseRepository.GetAllStudentsAsync();
+                    foreach (var student in students)
+                    {
+                        Students.Add(student);
+                    }
                 }
             }
             catch (Exception ex)

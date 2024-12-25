@@ -46,7 +46,7 @@ namespace StudentManager.DataAccess
         {
             using var connection = DBConnection.GetConnection();
             return await connection.QueryAsync<Major>(
-                "SELECT Id, Name, Description, Responsable FROM Majors"
+                "SELECT Id as MajorId, Name, Description, Responsable FROM Majors"
             );
         }
 
