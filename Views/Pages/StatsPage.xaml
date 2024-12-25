@@ -48,7 +48,7 @@
             </telerik:RadCartesianChart3D.XAxis>
 
             <telerik:RadCartesianChart3D.ZAxis>
-                <telerik:LinearAxis3D Title="Student Count" Foreground="White" Minimum="0" Maximum="200">
+                <telerik:LinearAxis3D Title="Student Count" Foreground="White" Minimum="0" Maximum="{Binding MaxStudentMajor.StudentCount}">
                     <telerik:LinearAxis3D.LineStyle>
                         <Style TargetType="Path">
                             <Setter Property="Stroke" Value="White"/>
