@@ -198,7 +198,7 @@ namespace StudentManager.Views.Pages
             MessageBox.Show($"Viewing details for {student.FirstName} {student.LastName}");
         }
 
-        private async void SearchTextBox_TextChanged(object sender, TextChangedEventArgs e)
+        private void SearchTextBox_TextChanged(object sender, TextChangedEventArgs e)
         {
             var mainViewModel = (MainViewModel)DataContext;
             mainViewModel.StudentsViewModel.FilterStudents(
@@ -207,7 +207,7 @@ namespace StudentManager.Views.Pages
             );
         }
 
-        private async void MajorComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        private void MajorComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             var mainViewModel = (MainViewModel)DataContext;
             mainViewModel.StudentsViewModel.SelectedMajor = MajorComboBox.SelectedItem as Major;
