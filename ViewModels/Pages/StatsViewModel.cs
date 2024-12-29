@@ -1,43 +1,82 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
-using System.Security.Cryptography.X509Certificates;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.ObjectModel;
 using GalaSoft.MvvmLight;
-using OxyPlot;
-using OxyPlot.Series;
-using OxyPlot.Axes;
 using StudentManager.Models;
-using System.DirectoryServices;
-using HelixToolkit.Wpf;
-using System.Windows.Media.Media3D;
-using System.Windows.Media;
-using LiveChartsCore.SkiaSharpView.Painting;
-using LiveChartsCore.SkiaSharpView;
-using LiveChartsCore;
-using SkiaSharp;
+using System.ComponentModel;
+using MySql.Data.MySqlClient;
+using StudentManager.Services;
 
 
 namespace StudentManager.ViewModels.Pages
 {
-    public class StatsViewModel : ViewModelBase
+    public class StatsViewModel : ViewModelBase, INotifyPropertyChanged
     {
-        public ObservableCollection<Stats> MajorStats { get; set; }
+        private ObservableCollection<Stats> _majorStats;
+        public Stats MaxStudentMajor { get; set; }
 
 
-        public StatsViewModel()
+        public ObservableCollection<Stats> MajorStats
         {
-            MajorStats = new ObservableCollection<Stats>
+            get => _majorStats;
+            set
             {
-                new Stats { Major = "Computer Science", StudentCount = 120 },
-                new Stats { Major = "Mathematics", StudentCount = 80 },
-                new Stats { Major = "Physics", StudentCount = 60 },
-                new Stats { Major = "Chemistry", StudentCount = 50 }
-            };
+                _majorStats = value;
+                RaisePropertyChanged(nameof(MajorStats));
+            }
         }
 
-    }
+       
+        public StatsViewModel()
+        {
+            LoadMajorStats();
+            LoadMaxStudentMajorStats();
+        }
 
+        private void LoadMajorStats()
+        {
+            using var connection = DBConnection.GetConnection();
+            connection?.Open();
+            var query = @"SELECT M.Name AS Major, COUNT(S.Id) AS StudentCount
+                          FROM Majors M
+                          LEFT JOIN Students S ON M.Id = S.MajorId
+                          GROUP BY M.Name";
+
+            using var command = new MySqlCommand(query, connection);
+            using var reader = command.ExecuteReader();
+            var statsList = new ObservableCollection<Stats>();
+            while (reader.Read())
+            {
+                statsList.Add(new Stats
+                {
+                    Major = reader.GetString(0),
+                    StudentCount = reader.GetInt32(1)
+                });
+            }
+            MajorStats = statsList;
+        }
+
+        private void LoadMaxStudentMajorStats()
+        {
+            using var connection = DBConnection.GetConnection();
+            connection?.Open();
+
+            var query = @"SELECT M.Name AS Major, COUNT(S.Id) AS StudentCount
+                          FROM Majors M
+                          LEFT JOIN Students S ON M.Id = S.MajorId
+                          GROUP BY M.Name
+                          ORDER BY StudentCount DESC
+                          LIMIT 1";
+
+            using var command = new MySqlCommand(query, connection);
+            using var reader = command.ExecuteReader();
+
+            if (reader.Read())
+            {
+                MaxStudentMajor = new Stats
+                {
+                    Major = reader.GetString(0),
+                    StudentCount = reader.GetInt32(1)
+                };
+            }
+        }
+    }
 }

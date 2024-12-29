@@ -5,15 +5,45 @@ using Wpf.Ui.Controls;
 namespace StudentManager.Views.Dialogs
 {
     /// <summary>
-    /// Interaction logic for AddMajorDialog.xaml
+    /// Interaction logic for EditMajorDialog.xaml
     /// </summary>
-    public partial class AddMajorDialog : FluentWindow
+    public partial class EditMajorDialog : FluentWindow
     {
-        public Major NewMajor { get; set; }
-
-        public AddMajorDialog()
+        public EditMajorDialog()
         {
             InitializeComponent();
+
+            Loaded += EditMajorDialog_Loaded;
+
+            // Set focus to the name text box
+            NameTextBox.Focus();
+        }
+
+        private void EditMajorDialog_Loaded(object sender, RoutedEventArgs e)
+        {
+            // Get current major
+            var major = (Major)DataContext;
+
+            // Set text box values
+            NameTextBox.Text = major.Name;
+            DescriptionTextBox.Text = major.Description;
+            ResponsableTextBox.Text = major.Responsable;
+        }
+
+        private void SaveButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (!ValidateInput()) return;
+
+            // Get current major
+            var major = (Major)DataContext;
+
+            // Update major properties
+            major.Name = NameTextBox.Text;
+            major.Description = DescriptionTextBox.Text;
+            major.Responsable = ResponsableTextBox.Text;
+
+            // Set dialog result to true
+            DialogResult = true;
         }
 
         private bool ValidateInput()
@@ -45,19 +75,6 @@ namespace StudentManager.Views.Dialogs
             }
 
             return isValid;
-        }
-
-        private void AddButton_Click(object sender, RoutedEventArgs e)
-        {
-            if (!ValidateInput()) return;
-
-            NewMajor = new Major
-            {
-                Name = NameTextBox.Text,
-                Description = DescriptionTextBox.Text,
-                Responsable = ResponsableTextBox.Text
-            };
-            DialogResult = true;
         }
 
         private void CancelButton_Click(object sender, RoutedEventArgs e)

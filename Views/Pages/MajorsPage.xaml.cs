@@ -1,10 +1,12 @@
-﻿using StudentManager.Models;
+﻿using MySql.Data.MySqlClient;
+using StudentManager.Models;
 using StudentManager.ViewModels;
 using StudentManager.ViewModels.Pages;
-using System.Collections.ObjectModel;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Input;
+using StudentManager.Views.Windows;
+using StudentManager.Services;
+using StudentManager.DataAccess;
 
 namespace StudentManager.Views.Pages
 {
@@ -15,15 +17,17 @@ namespace StudentManager.Views.Pages
     {
         public MajorsViewModel ViewModel { get; set; }
 
-        private int _lastSelectedIndex = -1;
-
         public MajorsPage()
         {
             InitializeComponent();
             DataContext = new MainViewModel();
+
+            // Set the BreadcrumbBar
+            var mainWindow = (MainWindow)Application.Current.MainWindow;
+            mainWindow.BreadcrumbBar.ItemsSource = new[] { "Gestion des filières" };
         }
 
-        private void AddButton_Click(object sender, RoutedEventArgs e)
+        private async void AddButton_Click(object sender, RoutedEventArgs e)
         {
             var mainViewModel = (MainViewModel)DataContext;
             var dialog = new Dialogs.AddMajorDialog
@@ -32,23 +36,37 @@ namespace StudentManager.Views.Pages
             };
             if (dialog.ShowDialog() == true)
             {
-                mainViewModel.MajorsViewModel.Majors.Add(dialog.NewMajor);
+                var major = dialog.NewMajor;
+                if (await DatabaseRepository.AddMajorAsync(major))
+                {
+                    mainViewModel.MajorsViewModel.Majors.Add(major);
+                }
             }
         }
 
-        private void EditButton_Click(object sender, RoutedEventArgs e)
+        private async void DeleteButton_Click(object sender, RoutedEventArgs e)
         {
-            // TODO: Implement
-        }
+            // Prompt the user to confirm the deletion (in French)
+            var result = MessageBox.Show("Voulez-vous vraiment supprimer les filières sélectionnées ? " +
+                "Vous allez perdre toutes les données des étudiants associés. " +
+                "(Cette action est irréversible)",
+                "Confirmation de suppression", MessageBoxButton.YesNo, MessageBoxImage.Warning);
+            if (result == MessageBoxResult.No)
+            {
+                return;
+            }
 
-        private void DeleteButton_Click(object sender, RoutedEventArgs e)
-        {
             var mainViewModel = (MainViewModel)DataContext;
             var selectedMajors = mainViewModel.MajorsViewModel.Majors.Where(m => m.IsSelected).ToList();
             foreach (var major in selectedMajors)
             {
-                mainViewModel.MajorsViewModel.Majors.Remove(major);
+                if (await DatabaseRepository.DeleteMajorAsync(major.MajorId))
+                {
+                    CacheService.Majors.Remove(major);
+                }
             }
+            mainViewModel.MajorsViewModel.SelectedMajors.Clear();
+            mainViewModel.MajorsViewModel.RaisePropertyChanged(nameof(MajorsViewModel.SelectedMajors));
         }
 
         private void CheckBox_Checked(object sender, RoutedEventArgs e)
@@ -65,35 +83,27 @@ namespace StudentManager.Views.Pages
             ((MainViewModel)DataContext).MajorsViewModel.RaisePropertyChanged(nameof(MajorsViewModel.SelectedMajors));
         }
 
-        //private void SelectAllCheckBox_Checked(object sender, RoutedEventArgs e)
-        //{
-        //    var mainViewModel = (MainViewModel)DataContext;
-        //    foreach (var major in mainViewModel.MajorsViewModel.Majors)
-        //    {
-        //        major.IsSelected = true;
-        //    }
-        //}
-
-        //private void SelectAllCheckBox_Unchecked(object sender, RoutedEventArgs e)
-        //{
-        //    var mainViewModel = (MainViewModel)DataContext;
-        //    foreach (var major in mainViewModel.MajorsViewModel.Majors)
-        //    {
-        //        major.IsSelected = false;
-        //    }
-        //}
-
-        private void UpdateDeleteButtonState()
-        {
-            var mainViewModel = (MainViewModel)DataContext;
-            DeleteButton.IsEnabled = mainViewModel.MajorsViewModel.Majors.Any(m => m.IsSelected);
-        }
-
-        
-        private void InfoButton_Click(object sender, RoutedEventArgs e)
+        private void ViewDetailsButton_Click(object sender, RoutedEventArgs e)
         {
             var major = (Major)((Button)sender).DataContext;
-            MessageBox.Show($"Viewing details for {major.Name}");
+            var mainViewModel = (MainWindow)Window.GetWindow(this);
+            mainViewModel.RootNavigation.Navigate(typeof(MajorDetailsPage), major);
+        }
+
+        private void ViewUsageInfoButton_Click(object sender, RoutedEventArgs e)
+        {
+            var dialog = new MajorsUsageInfoDialog();
+            dialog.ShowDialog();
+        }
+
+        private void DeselectAllButton_Click(object sender, RoutedEventArgs e)
+        {
+            var mainViewModel = (MainViewModel)DataContext;
+            foreach (var major in mainViewModel.MajorsViewModel.Majors)
+            {
+                major.IsSelected = false;
+            }
+            mainViewModel.MajorsViewModel.RaisePropertyChanged(nameof(MajorsViewModel.SelectedMajors));
         }
     }
 }

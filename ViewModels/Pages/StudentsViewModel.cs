@@ -1,91 +1,106 @@
 ﻿using GalaSoft.MvvmLight;
-using GalaSoft.MvvmLight.Command;
 using StudentManager.Models;
-using System;
-using System.Collections.Generic;
+using StudentManager.Services;
 using System.Collections.ObjectModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Input;
+using StudentManager.DataAccess;
 
 namespace StudentManager.ViewModels.Pages
 {
     public class StudentsViewModel : ViewModelBase
     {
-        public ObservableCollection<Student> Students { get; }
-        public ObservableCollection<Student> SelectedStudents => new(Students.Where(s => s.IsSelected));
-        public ObservableCollection<Major> MajorsWithAll { get; } 
+        public ObservableCollection<Student> Students => CacheService.Students;
+        public ObservableCollection<Major> MajorsWithAll { get; set; }
+        private ObservableCollection<Student> _selectedStudents;
+        public ObservableCollection<Student> SelectedStudents
+        {
+            get => _selectedStudents;
+            private set
+            {
+                _selectedStudents = value;
+                RaisePropertyChanged();
+            }
+        }
 
-        public ICommand ViewUsageInfoCommand { get; }
+        private Major? _selectedMajor;
+        public Major? SelectedMajor
+        {
+            get => _selectedMajor;
+            set
+            {
+                _selectedMajor = value;
+                RaisePropertyChanged();
+                RaisePropertyChanged(nameof(IsMajorSelected));
+                RaisePropertyChanged(nameof(IsMajorNotSelected));
+            }
+        }
+
+        public bool IsMajorSelected => _selectedMajor != null && _selectedMajor.Name != "Tout";
+        public bool IsMajorNotSelected => !IsMajorSelected;
 
         public StudentsViewModel(MajorsViewModel majorsViewModel)
         {
-            //TODO: Replace with data from a database (ids should start from 1)
-            Students =
-            [
-                new Student
-                {
-                    Id = 1,
-                    FirstName = "John",
-                    LastName = "Doe",
-                    Email = "john.doe@example.com",
-                    Major = majorsViewModel.Majors.FirstOrDefault(m => m.Id == 1),
-                    DateOfBirth = new DateTime(1990, 1, 1)
-                },
-                new Student
-                {
-                    Id = 2,
-                    FirstName = "Jane",
-                    LastName = "Smith",
-                    Email = "jane.smith@example.com",
-                    Major = majorsViewModel.Majors.FirstOrDefault(m => m.Id == 2),
-                    DateOfBirth = new DateTime(1992, 2, 2)
-                },
-                new Student
-                {
-                    Id = 3,
-                    FirstName = "Alice",
-                    LastName = "Johnson",
-                    Email = "alice.johnson@example.com",
-                    Major = majorsViewModel.Majors.FirstOrDefault(m => m.Id == 3),
-                    DateOfBirth = new DateTime(1994, 3, 3)
-                },
-                new Student
-                {
-                    Id = 4,
-                    FirstName = "Bob",
-                    LastName = "Brown",
-                    Email = "bob.brown@example.com",
-                    Major = majorsViewModel.Majors.FirstOrDefault(m => m.Id == 4),
-                    DateOfBirth = new DateTime(1996, 4, 4)
-                },
-                new Student
-                {
-                    Id = 5,
-                    FirstName = "Charlie",
-                    LastName = "Davis",
-                    Email = "charlie.davis@example.com",
-                    Major = majorsViewModel.Majors.FirstOrDefault(m => m.Id == 1),
-                    DateOfBirth = new DateTime(1998, 5, 5)
-                }
-            ];
-
+            // Create a new ObservableCollection with the 'All' item at the beginning
             MajorsWithAll = new ObservableCollection<Major>(majorsViewModel.Majors);
-            MajorsWithAll.Insert(0, new Major { Id = 0, Name = "Tout", Description = "All Majors" });
+            MajorsWithAll.Insert(0, new Major { MajorId = 0, Name = "Tout", Description = "All Majors", Responsable = "All" });
 
-            // Subscribe to the CollectionChanged event to update the SelectedStudents property
-            Students.CollectionChanged += (s, e) => RaisePropertyChanged(nameof(SelectedStudents));
-
-            ViewUsageInfoCommand = new RelayCommand(ViewUsageInfo);
-
+            // Initialisation de la liste des étudiants
+            SelectedStudents = new ObservableCollection<Student>();
+            _ = LoadStudentsAsync(); // Load students asynchronously
+            _ = LoadMajorsAsync(); // Load majors asynchronously
         }
 
-        private void ViewUsageInfo()
+        private async Task LoadStudentsAsync()
         {
-            // For now, just show a message box
-            MessageBox.Show("This is a message box");
+            try
+            {
+                if (Students.Count == 0)
+                {
+                    var students = await DatabaseRepository.GetAllStudentsAsync();
+                    foreach (var student in students)
+                    {
+                        Students.Add(student);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Erreur lors du chargement des étudiants: {ex.Message}");
+            }
+        }
+
+        private async Task LoadMajorsAsync()
+        {
+            try
+            {
+                var majors = await DatabaseRepository.GetAllMajorsAsync();
+                foreach (var major in majors)
+                {
+                    MajorsWithAll.Add(major);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Erreur lors du chargement des majeures: {ex.Message}");
+            }
+        }
+
+        public void AddSelectedStudent(Student student)
+        {
+            if (!SelectedStudents.Contains(student))
+            {
+                SelectedStudents.Add(student);
+                RaisePropertyChanged(nameof(SelectedStudents));
+            }
+        }
+
+        public void RemoveSelectedStudent(Student student)
+        {
+            if (SelectedStudents.Contains(student))
+            {
+                SelectedStudents.Remove(student);
+                RaisePropertyChanged(nameof(SelectedStudents));
+            }
         }
     }
 }

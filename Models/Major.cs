@@ -1,23 +1,19 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.ComponentModel;
 
 namespace StudentManager.Models
 {
-    public class Major
+    public class Major : INotifyPropertyChanged
     {
         public event PropertyChangedEventHandler? PropertyChanged;
 
         private int _id;
-        private string _name;
-        private string _description;
+        private string? _name;
+        private string? _description;
+		public string _responsable;
         private bool _isSelected;
 
 
-        public int Id
+        public int MajorId
 		{
 			get => _id;
 			set
@@ -25,11 +21,11 @@ namespace StudentManager.Models
 				if (_id != value)
 				{
 					_id = value;
-					OnPropertyChanged(nameof(Id));
+					OnPropertyChanged(nameof(MajorId));
 				}
 			}
 		}
-        public required string Name
+        public required string? Name
 		{
 			get => _name;
 			set
@@ -41,7 +37,7 @@ namespace StudentManager.Models
 				}
 			}
 		}
-        public required string Description
+        public required string? Description
 		{
 			get => _description;
 			set
@@ -53,6 +49,18 @@ namespace StudentManager.Models
 				}
 			}
 		}
+        public required string? Responsable
+        {
+            get => _responsable;
+            set
+            {
+                if (_responsable != value)
+                {
+                    _responsable = value;
+                    OnPropertyChanged(nameof(Responsable));
+                }
+            }
+        }
 
         public bool IsSelected
         {

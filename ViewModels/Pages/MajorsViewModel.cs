@@ -1,39 +1,39 @@
 ﻿using GalaSoft.MvvmLight;
-using GalaSoft.MvvmLight.Command;
 using StudentManager.Models;
+using StudentManager.Services;
 using System.Collections.ObjectModel;
 using System.Windows;
-using System.Windows.Input;
+using StudentManager.DataAccess;
 
 namespace StudentManager.ViewModels.Pages
 {
     public class MajorsViewModel : ViewModelBase
     {
-        public ObservableCollection<Major> Majors { get; }
+        public ObservableCollection<Major> Majors => CacheService.Majors;
         public ObservableCollection<Major> SelectedMajors => new(Majors.Where(m => m.IsSelected));
-
-        public ICommand ViewDetailsCommand { get; }
 
         public MajorsViewModel()
         {
-            //TODO: Replace with data from a database (start ids from 1 so that the `All` item can have an id of 0)
-            Majors =
-            [
-                new Major { Id = 1, Name = "Computer Science", Description = "Computer Science" },
-                new Major { Id = 2, Name = "Mathematics", Description = "Mathematics" },
-                new Major { Id = 3, Name = "Physics", Description = "Physics" },
-                new Major { Id = 4, Name = "Chemistry", Description = "Chemistry" }
-            ];
-
-            Majors.CollectionChanged += (m, e) => RaisePropertyChanged(nameof(SelectedMajors)); // Update SelectedMajors when Majors changes
-
-            ViewDetailsCommand = new RelayCommand<Major>(ViewDetails);
+            _ = LoadMajorsAsync();
         }
 
-        private void ViewDetails(Major major)
+        private async Task LoadMajorsAsync()
         {
-            // For now, just show a message box
-            MessageBox.Show($"Viewing details for {major.Name}");
+            try
+            {
+                if (Majors.Count == 0)
+                {
+                    var majors = await DatabaseRepository.GetAllMajorsAsync();
+                    foreach (var major in majors)
+                    {
+                        Majors.Add(major);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Erreur lors du chargement des majeures: {ex.Message}");
+            }
         }
     }
 }
