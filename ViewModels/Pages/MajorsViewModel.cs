@@ -4,6 +4,7 @@ using StudentManager.Services;
 using System.Collections.ObjectModel;
 using System.Windows;
 using StudentManager.DataAccess;
+using Telerik.Windows.Diagrams.Core;
 
 namespace StudentManager.ViewModels.Pages
 {
@@ -11,29 +12,41 @@ namespace StudentManager.ViewModels.Pages
     {
         public ObservableCollection<Major> Majors => CacheService.Majors;
         public ObservableCollection<Major> SelectedMajors => new(Majors.Where(m => m.IsSelected));
+        public ObservableCollection<Major> MajorsWithAll { get; set; }
 
         public MajorsViewModel()
         {
-            _ = LoadMajorsAsync();
+            //_ = UpdateMajorsAsync();
+
+            // Create a new ObservableCollection with the 'All' item at the beginning
+            MajorsWithAll = [];
+            MajorsWithAll.Insert(0,
+                new Major { MajorId = 0, Name = "Tout", Description = "Toutes les majeures", Responsable = "Tous" });
         }
 
-        private async Task LoadMajorsAsync()
+        public async Task UpdateMajorsAsync()
         {
             try
             {
-                if (Majors.Count == 0)
-                {
-                    var majors = await DatabaseRepository.GetAllMajorsAsync();
-                    foreach (var major in majors)
-                    {
-                        Majors.Add(major);
-                    }
-                }
+                CacheService.Majors = new(await DatabaseRepository.GetAllMajorsAsync());
+                MajorsWithAll.AddRange(CacheService.Majors);
             }
             catch (Exception ex)
             {
                 MessageBox.Show($"Erreur lors du chargement des majeures: {ex.Message}");
             }
+        }
+
+        public void AddMajor(Major major)
+        {
+            Majors.Add(major);
+            MajorsWithAll.Add(major);
+        }
+
+        public void RemoveMajor(Major major)
+        {
+            Majors.Remove(major);
+            MajorsWithAll.Remove(major);
         }
     }
 }

@@ -1,6 +1,7 @@
 using Dapper;
 using StudentManager.Models;
 using StudentManager.Services;
+using StudentManager.ViewModels;
 
 namespace StudentManager.DataAccess
 {
@@ -58,7 +59,12 @@ namespace StudentManager.DataAccess
                        SELECT LAST_INSERT_ID();";
             
             student.Id = await connection.ExecuteScalarAsync<int>(sql, student);
-            return student.Id > 0;
+            if (student.Id > 0)
+            {
+                await LogCrudOperationAsync(MainViewModel.CurrentSession.UserId, "Add", $"Added student: {student.FirstName} {student.LastName}");
+                return true;
+            }
+            return false;
         }
 
         public static async Task<bool> UpdateStudentAsync(Student student)
@@ -77,17 +83,33 @@ namespace StudentManager.DataAccess
                     student.Id
                 }
             );
-            return rowsAffected > 0;
+            if (rowsAffected > 0)
+            {
+                await LogCrudOperationAsync(MainViewModel.CurrentSession.UserId, "Update", $"Updated student: {student.FirstName} {student.LastName}");
+                return true;
+            }
+            return false;
         }
 
         public static async Task<bool> DeleteStudentAsync(int id)
         {
             using var connection = DBConnection.GetConnection();
+            var student = await connection.QuerySingleOrDefaultAsync<Student>("SELECT FirstName, LastName FROM Students WHERE Id = @Id", new { Id = id });
+            if (student == null)
+            {
+                return false;
+            }
+
             var rowsAffected = await connection.ExecuteAsync(
                 "DELETE FROM Students WHERE Id = @Id",
                 new { Id = id }
             );
-            return rowsAffected > 0;
+            if (rowsAffected > 0)
+            {
+                await LogCrudOperationAsync(MainViewModel.CurrentSession.UserId, "Delete", $"Deleted student: {student.FirstName} {student.LastName}");
+                return true;
+            }
+            return false;
         }
 
         public static async Task<bool> AddMajorAsync(Major major)
@@ -98,27 +120,63 @@ namespace StudentManager.DataAccess
                        SELECT LAST_INSERT_ID();";
             
             major.MajorId = await connection.ExecuteScalarAsync<int>(sql, major);
-            return major.MajorId > 0;
+            if (major.MajorId > 0)
+            {
+                await LogCrudOperationAsync(MainViewModel.CurrentSession.UserId, "Add", $"Added major: {major.Name}");
+                return true;
+            }
+            return false;
         }
 
         public static async Task<bool> UpdateMajorAsync(Major major)
         {
             using var connection = DBConnection.GetConnection();
             var rowsAffected = await connection.ExecuteAsync(
-                "UPDATE Majors SET Name = @Name, Description = @Description, Responsable = @Responsable WHERE Id = @Id",
+                "UPDATE Majors SET Name = @Name, Description = @Description, Responsable = @Responsable WHERE Id = @MajorId",
                 major
             );
-            return rowsAffected > 0;
+            if (rowsAffected > 0)
+            {
+                await LogCrudOperationAsync(MainViewModel.CurrentSession.UserId, "Update", $"Updated major: {major.Name}");
+                return true;
+            }
+            return false;
         }
 
         public static async Task<bool> DeleteMajorAsync(int id)
         {
             using var connection = DBConnection.GetConnection();
+            var major = await connection.QuerySingleOrDefaultAsync<Major>("SELECT Name FROM Majors WHERE Id = @Id", new { Id = id });
+            if (major == null)
+            {
+                return false;
+            }
+
             var rowsAffected = await connection.ExecuteAsync(
                 "DELETE FROM Majors WHERE Id = @Id",
                 new { Id = id }
             );
-            return rowsAffected > 0;
+            if (rowsAffected > 0)
+            {
+                await LogCrudOperationAsync(MainViewModel.CurrentSession.UserId, "Delete", $"Deleted major: {major.Name}");
+                return true;
+            }
+            return false;
+        }
+
+        public static async Task LogCrudOperationAsync(int userId, string operation, string details)
+        {
+            using var connection = DBConnection.GetConnection();
+            var sql = @"INSERT INTO CrudLogs (UserId, Operation, Details, Date)
+                        VALUES (@UserId, @Operation, @Details, @Date)";
+            await connection.ExecuteAsync(sql, new { UserId = userId, Operation = operation, Details = details, Date = DateTime.Now });
+        }
+
+        public static async Task<IEnumerable<LogEntry>> GetUserLogsAsync(int userId)
+        {
+            using var connection = DBConnection.GetConnection();
+            var sql = @"SELECT Date, Operation, Details FROM CrudLogs WHERE UserId = @UserId ORDER BY Date DESC";
+            return await connection.QueryAsync<LogEntry>(sql, new { UserId = userId });
         }
     }
 }

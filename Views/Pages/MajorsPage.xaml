@@ -39,7 +39,6 @@
                             <CheckBox IsChecked="{Binding IsSelected, Mode=TwoWay}"
                                 Checked="CheckBox_Checked" Unchecked="CheckBox_Unchecked"/>
                             <TextBlock Text="{Binding Name}" FontSize="16" FontWeight="Bold" Margin="10"/>
-                            <!--<TextBlock Text="{Binding Description}" Margin="10" TextWrapping="Wrap"/>-->
                             <Button Content="View Details" Margin="0,10,0,0" Click="ViewDetailsButton_Click"/>
                         </StackPanel>
                     </ui:Card>

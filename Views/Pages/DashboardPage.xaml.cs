@@ -1,6 +1,6 @@
 ﻿using System.Windows;
 using System.Windows.Controls;
-using StudentManager.ViewModels.Pages;
+using StudentManager.ViewModels;
 
 namespace StudentManager.Views.Pages
 {
@@ -12,7 +12,7 @@ namespace StudentManager.Views.Pages
         public DashboardPage()
         {
             InitializeComponent();
-            DataContext = new DashboardViewModel();
+            DataContext = MainViewModel.Instance;
 
             Loaded += DashboardPage_Loaded;
         }
@@ -22,6 +22,15 @@ namespace StudentManager.Views.Pages
             // Set the BreadcrumbBar
             var mainWindow = (MainWindow)Application.Current.MainWindow;
             mainWindow.BreadcrumbBar.ItemsSource = new[] { "Tableau de bord" };
+
+            // Load logs for the current user
+            MainViewModel.Instance.DashboardViewModel.LoadUserLogs();
+        }
+
+        private void CardControl_Click(object sender, RoutedEventArgs e)
+        {
+            var mainViewModel = (MainWindow)Window.GetWindow(this);
+            mainViewModel.RootNavigation.Navigate(typeof(StatsPage));
         }
     }
 }

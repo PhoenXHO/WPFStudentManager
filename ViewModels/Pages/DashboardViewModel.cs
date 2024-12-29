@@ -4,6 +4,8 @@ using System.Windows;
 using MySql.Data.MySqlClient;
 using StudentManager.Models;
 using StudentManager.Services;
+using System.Collections.ObjectModel;
+using StudentManager.DataAccess;
 
 namespace StudentManager.ViewModels.Pages
 {
@@ -13,6 +15,7 @@ namespace StudentManager.ViewModels.Pages
         private int _totalMajors;
         private int _totalStudents;
         private string _welcomeMessage;
+        private ObservableCollection<LogEntry> _userLogs;
 
         public string StudentsPerMajorText
         {
@@ -66,6 +69,19 @@ namespace StudentManager.ViewModels.Pages
             }
         }
 
+        public ObservableCollection<LogEntry> UserLogs
+        {
+            get => _userLogs;
+            set
+            {
+                if (_userLogs != value)
+                {
+                    _userLogs = value;
+                    OnPropertyChanged(nameof(UserLogs));
+                }
+            }
+        }
+
         public event PropertyChangedEventHandler PropertyChanged;
 
         protected virtual void OnPropertyChanged(string propertyName)
@@ -75,63 +91,49 @@ namespace StudentManager.ViewModels.Pages
 
         public DashboardViewModel()
         {
-            LoadAndProcessStudentData();
             WelcomeMessage = $"Bienvenue, {MainViewModel.CurrentSession?.Username}!";
+            UserLogs = [];
+
+            CacheService.StudentsChanged += UpdateStudentStats;
+            CacheService.MajorsChanged += UpdateMajorStats;
+
+            UpdateStats();
         }
 
-        private async void LoadAndProcessStudentData()
+        private void UpdateStats()
         {
-            var students = await LoadStudentDataFromDbAsync();
+            UpdateStudentStats();
+            UpdateMajorStats();
+        }
+
+        private void UpdateStudentStats()
+        {
+            var students = CacheService.Students;
             var studentsPerMajor = students
                 .GroupBy(s => s.Major?.Name ?? "Non attribué")
                 .ToDictionary(g => g.Key, g => g.Count());
 
-            TotalMajors = studentsPerMajor.Count;
-            TotalStudents = students.Count();
-
+            // First 5 only
+            TotalStudents = students.Count;
             StudentsPerMajorText = string.Join("\n",
-                studentsPerMajor.Select(kv => $"- {kv.Key}: {kv.Value} étudiant{(kv.Value > 1 ? "s" : "")}"));
+                studentsPerMajor.Take(5).Select(kv =>
+                    $"- {kv.Key}: {kv.Value} étudiant{(kv.Value > 1 ? "s" : "")}"));
         }
 
-        private async Task<IEnumerable<Student>> LoadStudentDataFromDbAsync()
+        private void UpdateMajorStats()
         {
-            var students = new List<Student>();
-            try
+            TotalMajors = CacheService.Majors.Count;
+        }
+
+        public async void LoadUserLogs()
+        {
+            var logs = await DatabaseRepository.GetUserLogsAsync(MainViewModel.CurrentSession.UserId);
+            UserLogs.Clear();
+            // First 7 only
+            foreach (var log in logs.Take(7))
             {
-                using var connection = DBConnection.GetConnection();
-                await connection.OpenAsync();
-
-                string query = @"SELECT Students.Id, Students.FirstName, Students.LastName, Students.Email, Students.MajorId, Students.DateOfBirth, Majors.Name as MajorName, Majors.Description as MajorDescription, Majors.Responsable as Responsable 
-                                 FROM Students LEFT JOIN Majors ON Students.MajorId = Majors.Id";
-
-                using var command = new MySqlCommand(query, connection);
-                using var reader = await command.ExecuteReaderAsync();
-                while (await reader.ReadAsync())
-                {
-                    var student = new Student
-                    {
-                        Id = reader.GetInt32("Id"),
-                        FirstName = reader.GetString("FirstName"),
-                        LastName = reader.GetString("LastName"),
-                        Email = reader.GetString("Email"),
-                        DateOfBirth = reader.IsDBNull(reader.GetOrdinal("DateOfBirth")) ? null : reader.GetDateTime("DateOfBirth"),
-                        Major = new Major
-                        {
-                            MajorId = reader.GetInt32("MajorId"),
-                            Name = reader.GetString("MajorName"),
-                            Description = reader.GetString("MajorDescription"),
-                            Responsable = reader.GetString("Responsable")
-                        }
-                    };
-
-                    students.Add(student);
-                }
+                UserLogs.Add(log);
             }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Erreur lors de la récupération des étudiants: {ex.Message}");
-            }
-            return students;
         }
     }
 }
