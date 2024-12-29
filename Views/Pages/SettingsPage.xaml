@@ -48,10 +48,10 @@
                     -->
                     <TextBlock Grid.Column="2"/>
 
-                    <TextBlock Grid.Column="3" Text="Light Mode" FontSize="16" Margin="0,0,10,0" VerticalAlignment="Center" Foreground="White"/>
+                    <!--<TextBlock Grid.Column="3" Text="Light Mode" FontSize="16" Margin="0,0,10,0" VerticalAlignment="Center" Foreground="White"/>
 
                     <ui:ToggleSwitch Grid.Column="4" x:Name="ThemeSwitch" VerticalAlignment="Center" 
-                                     IsChecked="{Binding IsDarkModeEnabled, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                                     IsChecked="{Binding IsDarkModeEnabled, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>-->
                 </Grid>
 
                 <!-- User Settings Section -->

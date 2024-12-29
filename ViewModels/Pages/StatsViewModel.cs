@@ -3,7 +3,9 @@ using GalaSoft.MvvmLight;
 using StudentManager.Models;
 using System.ComponentModel;
 using MySql.Data.MySqlClient;
+using StudentManager.DataAccess;
 using StudentManager.Services;
+using System.Data;
 
 
 namespace StudentManager.ViewModels.Pages
@@ -11,8 +13,7 @@ namespace StudentManager.ViewModels.Pages
     public class StatsViewModel : ViewModelBase, INotifyPropertyChanged
     {
         private ObservableCollection<Stats> _majorStats;
-        public Stats MaxStudentMajor { get; set; }
-
+        private Stats? _maxStudentMajor;
 
         public ObservableCollection<Stats> MajorStats
         {
@@ -24,59 +25,38 @@ namespace StudentManager.ViewModels.Pages
             }
         }
 
-       
+        public Stats? MaxStudentMajor
+        {
+            get => _maxStudentMajor;
+            set
+            {
+                _maxStudentMajor = value;
+                RaisePropertyChanged(nameof(MaxStudentMajor));
+            }
+        }
+
         public StatsViewModel()
         {
-            LoadMajorStats();
-            LoadMaxStudentMajorStats();
+            _majorStats = [];
+
+            CacheService.StudentsChanged += UpdateStats;
+            CacheService.MajorsChanged += UpdateStats;
+
+            UpdateStats();
         }
 
-        private void LoadMajorStats()
+        private void UpdateStats()
         {
-            using var connection = DBConnection.GetConnection();
-            connection?.Open();
-            var query = @"SELECT M.Name AS Major, COUNT(S.Id) AS StudentCount
-                          FROM Majors M
-                          LEFT JOIN Students S ON M.Id = S.MajorId
-                          GROUP BY M.Name";
-
-            using var command = new MySqlCommand(query, connection);
-            using var reader = command.ExecuteReader();
-            var statsList = new ObservableCollection<Stats>();
-            while (reader.Read())
-            {
-                statsList.Add(new Stats
+            var stats = CacheService.Majors
+                .Select(m => new Stats
                 {
-                    Major = reader.GetString(0),
-                    StudentCount = reader.GetInt32(1)
-                });
-            }
-            MajorStats = statsList;
-        }
+                    Major = m.Name,
+                    StudentCount = CacheService.Students.Count(s => s.Major?.Name == m.Name)
+                }).ToList();
 
-        private void LoadMaxStudentMajorStats()
-        {
-            using var connection = DBConnection.GetConnection();
-            connection?.Open();
+            MajorStats = new(stats);
 
-            var query = @"SELECT M.Name AS Major, COUNT(S.Id) AS StudentCount
-                          FROM Majors M
-                          LEFT JOIN Students S ON M.Id = S.MajorId
-                          GROUP BY M.Name
-                          ORDER BY StudentCount DESC
-                          LIMIT 1";
-
-            using var command = new MySqlCommand(query, connection);
-            using var reader = command.ExecuteReader();
-
-            if (reader.Read())
-            {
-                MaxStudentMajor = new Stats
-                {
-                    Major = reader.GetString(0),
-                    StudentCount = reader.GetInt32(1)
-                };
-            }
+            MaxStudentMajor = MajorStats.OrderByDescending(s => s.StudentCount).FirstOrDefault();
         }
     }
 }

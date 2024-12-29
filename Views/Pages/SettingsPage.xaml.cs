@@ -6,7 +6,7 @@ using System.Text.Json;
 using System.Windows;
 using System.Windows.Controls;
 using StudentManager.ViewModels;
-using StudentManager.Services;
+using StudentManager.DataAccess;
 
 namespace StudentManager.Views.Pages
 {

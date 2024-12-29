@@ -1,5 +1,5 @@
 ﻿using MySql.Data.MySqlClient;
-using StudentManager.Services;
+using StudentManager.DataAccess;
 using System.ComponentModel;
 using System.Windows;
 namespace StudentManager.Models

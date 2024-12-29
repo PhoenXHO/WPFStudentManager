@@ -2,7 +2,7 @@
 using Microsoft.Extensions.Configuration;
 using MySql.Data.MySqlClient;
 
-namespace StudentManager.Services
+namespace StudentManager.DataAccess
 {
     internal class DBConnection
     {

@@ -1,6 +1,5 @@
 using Dapper;
 using StudentManager.Models;
-using StudentManager.Services;
 using StudentManager.ViewModels;
 
 namespace StudentManager.DataAccess
