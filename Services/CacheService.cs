@@ -5,12 +5,19 @@ namespace StudentManager.Services
 {
     public static class CacheService
     {
+        public static event Action? StudentsChanged;
+        public static event Action? MajorsChanged;
+
         private static ObservableCollection<Student>? _students;
         
         public static ObservableCollection<Student> Students
         {
-            get => _students ??= new ObservableCollection<Student>();
-            set => _students = value;
+            get => _students ??= [];
+            set
+            {
+                _students = value;
+                StudentsChanged?.Invoke();
+            }
         }
 
         public static void ClearStudentsCache()
@@ -27,8 +34,12 @@ namespace StudentManager.Services
         
         public static ObservableCollection<Major> Majors
         {
-            get => _majors ??= new ObservableCollection<Major>();
-            set => _majors = value;
+            get => _majors ??= [];
+            set
+            {
+                _majors = value;
+                MajorsChanged?.Invoke();
+            }
         }
 
         public static void ClearMajorsCache()

@@ -9,7 +9,16 @@ namespace StudentManager.ViewModels.Pages
 {
     public class StudentsViewModel : ViewModelBase
     {
-        public ObservableCollection<Student> Students => CacheService.Students;
+        private ObservableCollection<Student> _students;
+        public ObservableCollection<Student> Students
+        {
+            get => _students;
+            private set
+            {
+                _students = value;
+                RaisePropertyChanged();
+            }
+        }
         public ObservableCollection<Major> MajorsWithAll { get; set; }
         private ObservableCollection<Student> _selectedStudents;
         public ObservableCollection<Student> SelectedStudents
@@ -40,28 +49,20 @@ namespace StudentManager.ViewModels.Pages
 
         public StudentsViewModel(MajorsViewModel majorsViewModel)
         {
-            // Create a new ObservableCollection with the 'All' item at the beginning
-            MajorsWithAll = new ObservableCollection<Major>(majorsViewModel.Majors);
-            MajorsWithAll.Insert(0, new Major { MajorId = 0, Name = "Tout", Description = "All Majors", Responsable = "All" });
+            _students = [];
+            _selectedStudents = [];
 
-            // Initialisation de la liste des étudiants
-            SelectedStudents = new ObservableCollection<Student>();
-            _ = LoadStudentsAsync(); // Load students asynchronously
-            _ = LoadMajorsAsync(); // Load majors asynchronously
+            MajorsWithAll = majorsViewModel.MajorsWithAll;
+
+            //_ = UpdateStudentsAsync(); // Load students asynchronously
         }
 
-        private async Task LoadStudentsAsync()
+        public async Task UpdateStudentsAsync()
         {
             try
             {
-                if (Students.Count == 0)
-                {
-                    var students = await DatabaseRepository.GetAllStudentsAsync();
-                    foreach (var student in students)
-                    {
-                        Students.Add(student);
-                    }
-                }
+                CacheService.Students = new(await DatabaseRepository.GetAllStudentsAsync());
+                Students = new(CacheService.Students);
             }
             catch (Exception ex)
             {
@@ -69,20 +70,18 @@ namespace StudentManager.ViewModels.Pages
             }
         }
 
-        private async Task LoadMajorsAsync()
+        public void AddStudent(Student student)
         {
-            try
-            {
-                var majors = await DatabaseRepository.GetAllMajorsAsync();
-                foreach (var major in majors)
-                {
-                    MajorsWithAll.Add(major);
-                }
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Erreur lors du chargement des majeures: {ex.Message}");
-            }
+            CacheService.Students.Add(student);
+            Students.Add(student);
+        }
+
+        public void RemoveStudent(Student student)
+        {
+            CloudinaryService.DeleteImage(student.Picture);
+            CacheService.Students.Remove(student);
+            Students.Remove(student);
+            RemoveSelectedStudent(student);
         }
 
         public void AddSelectedStudent(Student student)
@@ -101,6 +100,18 @@ namespace StudentManager.ViewModels.Pages
                 SelectedStudents.Remove(student);
                 RaisePropertyChanged(nameof(SelectedStudents));
             }
+        }
+
+        public void FilterStudents(string searchText = "", Major? selectedMajor = null)
+        {
+            var filteredStudents = CacheService.Students.Where(s =>
+                (string.IsNullOrEmpty(searchText) ||
+                 s.FirstName.Contains(searchText, StringComparison.OrdinalIgnoreCase) ||
+                 s.LastName.Contains(searchText, StringComparison.OrdinalIgnoreCase)) &&
+                (selectedMajor == null || selectedMajor.Name == "Tout" ||
+                 s.Major?.Name == selectedMajor.Name));
+
+            Students = new ObservableCollection<Student>(filteredStudents);
         }
     }
 }

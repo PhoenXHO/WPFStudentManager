@@ -2,7 +2,6 @@ using Dapper;
 using StudentManager.Models;
 using StudentManager.Services;
 using StudentManager.ViewModels;
-using System.Data;
 
 namespace StudentManager.DataAccess
 {
@@ -133,7 +132,7 @@ namespace StudentManager.DataAccess
         {
             using var connection = DBConnection.GetConnection();
             var rowsAffected = await connection.ExecuteAsync(
-                "UPDATE Majors SET Name = @Name, Description = @Description, Responsable = @Responsable WHERE Id = @Id",
+                "UPDATE Majors SET Name = @Name, Description = @Description, Responsable = @Responsable WHERE Id = @MajorId",
                 major
             );
             if (rowsAffected > 0)

@@ -20,7 +20,7 @@ namespace StudentManager.Views.Pages
         public MajorsPage()
         {
             InitializeComponent();
-            DataContext = new MainViewModel();
+            DataContext = MainViewModel.Instance;
 
             // Set the BreadcrumbBar
             var mainWindow = (MainWindow)Application.Current.MainWindow;
@@ -39,7 +39,7 @@ namespace StudentManager.Views.Pages
                 var major = dialog.NewMajor;
                 if (await DatabaseRepository.AddMajorAsync(major))
                 {
-                    mainViewModel.MajorsViewModel.Majors.Add(major);
+                    mainViewModel.MajorsViewModel.AddMajor(major);
                 }
             }
         }
@@ -62,7 +62,8 @@ namespace StudentManager.Views.Pages
             {
                 if (await DatabaseRepository.DeleteMajorAsync(major.MajorId))
                 {
-                    CacheService.Majors.Remove(major);
+                    mainViewModel.MajorsViewModel.RemoveMajor(major);
+                    await mainViewModel.StudentsViewModel.UpdateStudentsAsync();
                 }
             }
             mainViewModel.MajorsViewModel.SelectedMajors.Clear();

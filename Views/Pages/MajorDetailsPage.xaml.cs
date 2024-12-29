@@ -1,10 +1,8 @@
-﻿using MySql.Data.MySqlClient;
-using StudentManager.Models;
-using StudentManager.Services;
-using StudentManager.ViewModels;
+﻿using StudentManager.Models;
 using StudentManager.DataAccess;
 using System.Windows;
 using System.Windows.Controls;
+using StudentManager.ViewModels;
 
 namespace StudentManager.Views.Pages
 {
@@ -42,6 +40,7 @@ namespace StudentManager.Views.Pages
                 if (await DatabaseRepository.UpdateMajorAsync(CurrentMajor))
                 {
                     RefreshMajorData();
+                    await MainViewModel.Instance.StudentsViewModel.UpdateStudentsAsync();
                 }
             }
         }

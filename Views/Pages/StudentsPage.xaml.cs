@@ -23,7 +23,7 @@ namespace StudentManager.Views.Pages
         public StudentsPage()
         {
             InitializeComponent();
-            DataContext = new MainViewModel();
+            DataContext = MainViewModel.Instance;
 
             // Set the BreadcrumbBar
             var mainWindow = (MainWindow)Application.Current.MainWindow;
@@ -43,7 +43,7 @@ namespace StudentManager.Views.Pages
                 var student = dialog.NewStudent;
                 if (await DatabaseRepository.AddStudentAsync(student))
                 {
-                    mainViewModel.StudentsViewModel.Students.Add(student);
+                    mainViewModel.StudentsViewModel.AddStudent(student);
                 }
             }
         }
@@ -99,9 +99,7 @@ namespace StudentManager.Views.Pages
             {
                 if (await DatabaseRepository.DeleteStudentAsync(student.Id))
                 {
-                    CloudinaryService.DeleteImage(student.Picture);
-                    mainViewModel.StudentsViewModel.Students.Remove(student);
-                    mainViewModel.StudentsViewModel.RemoveSelectedStudent(student);
+                    mainViewModel.StudentsViewModel.RemoveStudent(student);
                 }
             }
         }
@@ -147,30 +145,6 @@ namespace StudentManager.Views.Pages
                 }
             }
             return null;
-        }
-
-        private void UpdateCheckBoxes()
-        {
-            var mainViewModel = (MainViewModel)DataContext;
-            foreach (var student in mainViewModel.StudentsViewModel.Students)
-            {
-                // Queue container check after UI update
-                Dispatcher.BeginInvoke(new Action(() =>
-                {
-                    if (UIDataGrid.ItemContainerGenerator.ContainerFromItem(student) is DataGridRow row)
-                    {
-                        var cell = UIDataGrid.Columns[0].GetCellContent(row)?.Parent as DataGridCell;
-                        if (cell != null)
-                        {
-                            var checkBox = FindVisualChild<CheckBox>(cell);
-                            if (checkBox != null)
-                            {
-                                checkBox.IsChecked = student.IsSelected;
-                            }
-                        }
-                    }
-                }), System.Windows.Threading.DispatcherPriority.Background);
-            }
         }
 
         private void DataGrid_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
@@ -227,66 +201,20 @@ namespace StudentManager.Views.Pages
         private async void SearchTextBox_TextChanged(object sender, TextChangedEventArgs e)
         {
             var mainViewModel = (MainViewModel)DataContext;
-            var filter = SearchTextBox.Text;
-
-            try
-            {
-                var students = await DatabaseRepository.GetAllStudentsAsync();
-                var filteredStudents = students.Where(s => 
-                    s.Id.ToString().Contains(filter) ||
-                    s.FirstName.Contains(filter) ||
-                    s.LastName.Contains(filter)
-                );
-
-                mainViewModel.StudentsViewModel.Students.Clear();
-                foreach (var student in filteredStudents)
-                {
-                    student.IsSelected = mainViewModel.StudentsViewModel.SelectedStudents
-                        .Any(s => s.Id == student.Id);
-                    mainViewModel.StudentsViewModel.Students.Add(student);
-                }
-
-                UpdateCheckBoxes();
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Erreur lors de la recherche : {ex.Message}");
-            }
+            mainViewModel.StudentsViewModel.FilterStudents(
+                SearchTextBox.Text,
+                MajorComboBox.SelectedItem as Major
+            );
         }
 
         private async void MajorComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             var mainViewModel = (MainViewModel)DataContext;
-            var selectedMajor = MajorComboBox.SelectedItem as Major;
-
-            try
-            {
-                IEnumerable<Student> students;
-                if (MajorComboBox.SelectedIndex == 0 || (selectedMajor != null && selectedMajor.Name == "Tout"))
-                {
-                    students = await DatabaseRepository.GetAllStudentsAsync();
-                    mainViewModel.StudentsViewModel.SelectedMajor = null;
-                }
-                else
-                {
-                    students = await DatabaseRepository.GetStudentsByMajorAsync(selectedMajor.Name);
-                    mainViewModel.StudentsViewModel.SelectedMajor = selectedMajor;
-                }
-
-                mainViewModel.StudentsViewModel.Students.Clear();
-                foreach (var student in students)
-                {
-                    student.IsSelected = mainViewModel.StudentsViewModel.SelectedStudents
-                        .Any(s => s.Id == student.Id);
-                    mainViewModel.StudentsViewModel.Students.Add(student);
-                }
-
-                UpdateCheckBoxes();
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Erreur lors de la recherche : {ex.Message}");
-            }
+            mainViewModel.StudentsViewModel.SelectedMajor = MajorComboBox.SelectedItem as Major;
+            mainViewModel.StudentsViewModel.FilterStudents(
+                SearchTextBox.Text,
+                MajorComboBox.SelectedItem as Major
+            );
         }
 
         private void ViewUsageInfoButton_Click(object sender, RoutedEventArgs e)
